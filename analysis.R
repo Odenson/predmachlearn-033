@@ -68,7 +68,8 @@ print(train.formula)
 starttime <- proc.time()
 
 # model using random forest
-model <- train(train.formula, data = training, method = "rf", proximity = TRUE, allowParallel = TRUE)
+model <- train(train.formula, data = training, method = "rf",
+               proximity = TRUE, allowParallel = TRUE)
 print(model$finalModel)
 
 # save model

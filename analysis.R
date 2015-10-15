@@ -1,11 +1,15 @@
 #!/usr/bin/R --verbose
 
+# Notes on Random Forest
+# * Random forest is affected by multicollinearity but not by outlier problem.
+# * add proximity = TRUE; Should proximity measure among the rows be calculated?
+# See http://www.listendata.com/2014/11/random-forest-with-r.html
+#
+
 require(dplyr, quietly = TRUE)
 require(caret, quietly = TRUE)
 # require(lubridate, quietly = TRUE)
 # require(ggplot2, quietly = TRUE)
-
-starttime <- proc.time()
 
 # load raw data
 raw <- read.csv(
@@ -52,23 +56,26 @@ good.names <- setdiff(names(training), bad.names)
 # exclude columns that do not aid in prediction (or are an outcome)
 train.names <- sort(grep(
     paste("classe", "_window", "user_name", "X", "_timestamp", sep = "|"),
-    good.names, value = TRUE, invert = TRUE
-))
+    good.names, value = TRUE, invert = TRUE)
+)
 # print(train.names)
 
-# use these column names to generate training formula
-train.formula <-
-    as.formula(paste("classe ~ ", paste(train.names, collapse = "+")))
+# use these names to generate training formula
+train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+")))
 print(train.formula)
 
+# record start time of model build
+starttime <- proc.time()
+
 # model using random forest
-model <- train(train.formula, data = training, method = "rf")
+model <- train(train.formula, data = training, method = "rf", proximity = TRUE, allowParallel = TRUE)
 print(model$finalModel)
 
 # save model
 rds.filename <- paste0("data/model-", model$method, ".rds")
 saveRDS(model, rds.filename)
 
+# how long did model take to build?
 elapsedtime <- proc.time() - starttime
 
 print("Total elapsed time is:")
@@ -78,8 +85,9 @@ print(elapsedtime)
 test.predict <- predict(model, newdata = testing)
 
 # show confusion matrix
-cm <- confusionMatrix(testing$classe, test.predict)
+cm <- confusionMatrix(data = test.predict, reference = testing$classe)
 cm
+varImp(model)
 
 # now lets look at validation
 
@@ -89,6 +97,3 @@ validation <- read.csv(
 )
 answers <- predict(model, newdata = validation)
 saveRDS(answers, "data/answers-rf.rds")
-
-
-

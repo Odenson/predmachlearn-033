@@ -1,0 +1,79 @@
+---
+title: "Predict Correct Use of Barbells"
+author: "Frank Jung"
+date: "14 October 2015"
+output:
+  html_document:
+    highlight: monochrome
+    toc: yes
+---
+
+```{r initialisation, echo=TRUE, message=TRUE, warning=TRUE}
+require(knitr, quietly = TRUE)
+require(caret, quietly = TRUE)
+```
+
+Actions:
+
+(1) Will to convert Excel's '#DIV/0!' to NA.
+(2) Do not include row number field ``X``as not required regression model.
+(3) Factors
+
+
+```{r load, echo=TRUE}
+# load raw data
+raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
+
+# set classe as a factor
+raw$classe <- factor(raw$classe)
+
+# split into train (70%) and test (30%) on outcome (classe)
+rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
+training <- raw[rawindex,]
+testing <- raw[-rawindex,]
+
+# ignore columns that are more than 95% empty (i.e. NA):
+nas.perc <- as.integer(0.95 * nrow(raw))
+nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+bad.names <- sort(names(nas[nas >= 19216])); bad.names
+good.names <- setdiff(names(training), bad.names); good.names
+
+# exclude columns that do not aid in prediction (or are an outcome)
+train.names <- grep(paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"), good.names, value = TRUE, invert = TRUE); train.names
+
+# use these column names to generate training formula
+train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+"))); train.formula
+```
+
+Outcome = classe
+
+
+Split on time series or num_windows field:
+See http://topepo.github.io/caret/splitting.html
+
+```r
+# select just num_window and classe from data frame
+train.unique <- unique(subset(training, select = c("num_window", "classe")))
+
+# how many unique combinations of num_window and classe?
+nrow(train.unique)
+# [1] 858
+
+# how many unique windows?
+length(unique(training$num_window))
+# [1] 858
+
+# so can use num_windows to create data partitions
+```
+
+# Appendices
+
+## References
+
+* Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
+
+## Session Information
+
+```{r environment}
+sessionInfo()
+```

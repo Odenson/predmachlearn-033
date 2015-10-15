@@ -84,6 +84,8 @@ print(elapsedtime)
 
 # test
 test.predict <- predict(model, newdata = testing)
+# get accuracy returns Accuracy and Kappa
+postResample(test.predict, testing$classe)
 
 # show confusion matrix
 cm <- confusionMatrix(data = test.predict, reference = testing$classe)
@@ -97,4 +99,5 @@ validation <- read.csv(
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
 answers <- predict(model, newdata = validation)
+# save answers
 saveRDS(answers, "data/answers-rf.rds")

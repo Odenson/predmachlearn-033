@@ -1,6 +1,6 @@
 #!/usr/bin/R --verbose
 
-require(dply, quietly = TRUE)
+require(dplyr, quietly = TRUE)
 require(caret, quietly = TRUE)
 # require(lubridate, quietly = TRUE)
 # require(ggplot2, quietly = TRUE)

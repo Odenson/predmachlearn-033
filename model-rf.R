@@ -9,7 +9,7 @@
 require(dplyr, quietly = TRUE)
 require(caret, quietly = TRUE)
 # require(lubridate, quietly = TRUE)
-# require(ggplot2, quietly = TRUE)
+require(ggplot2, quietly = TRUE)
 
 # load raw data
 raw <- read.csv(
@@ -17,7 +17,7 @@ raw <- read.csv(
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
 
-# set factors classe (for outcome), num_window for partitioning
+# set factors classe (for outcome)
 # raw$cvtd_timestamp <- dmy_hm(raw$cvtd_timestamp)
 # raw$num_window <- factor(raw$num_window)
 raw$classe <- factor(raw$classe)
@@ -25,9 +25,12 @@ raw$classe <- factor(raw$classe)
 # order by window num and raw_timestamp_part_2 to mimic a timeseries
 raw <- arrange(raw, num_window, raw_timestamp_part_2)
 
+# show relationship between window and classe
 # qplot(num_window, cvtd_timestamp, data = raw[raw$user_name == "carlitos",], colour = classe)
 # qplot(num_window, classe, data = raw[raw$user_name == "carlitos",], colour = classe)
-# qplot(num_window, classe, data = raw, colour = classe)
+png(filename = "data/plot-window-classe.png", width = 640, height = 480, units = "px")
+qplot(num_window, classe, data = raw, colour = classe)
+dev.off()
 
 # split into train (70%) and test (30%) on classe
 set.seed(033)
@@ -37,11 +40,13 @@ training <- raw[rawindex,]
 testing <- raw[-rawindex,]
 
 # do we have a good classe split?
-# levels(training$classe)
-# levels(testing$classe)
+table(training$classe)
+table(testing$classe)
 
 # do we have any window overlap between train and test?
 # intersect(unique(training$num_window), unique(testing$num_window))
+
+# prepare model formula:
 
 # ignore columns that are more than 95% empty (i.e. NA):
 nas.perc <- as.integer(0.95 * nrow(raw))
@@ -52,14 +57,12 @@ bad.names <- names(nas[nas >= nas.perc])
 # print(bad.names)
 good.names <- setdiff(names(training), bad.names)
 # print(good.names)
-
 # exclude columns that do not aid in prediction (or are an outcome)
 train.names <- sort(grep(
     paste("classe", "_window", "user_name", "X", "_timestamp", sep = "|"),
     good.names, value = TRUE, invert = TRUE)
 )
 # print(train.names)
-
 # use these names to generate training formula
 train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+")))
 print(train.formula)
@@ -70,7 +73,13 @@ starttime <- proc.time()
 # model using random forest
 model <- train(train.formula, data = training, method = "rf",
                proximity = TRUE, allowParallel = TRUE)
-print(model$finalModel)
+
+# print some information on this model
+print(model$finalModel$problemType)
+print(model$method)
+print(model$finalModel$xNames)
+print(model$finalModel$obsLevels)
+print(model$metric)
 
 # save model
 rds.filename <- paste0("data/model-", model$method, ".rds")
@@ -78,7 +87,6 @@ saveRDS(model, rds.filename)
 
 # how long did model take to build?
 elapsedtime <- proc.time() - starttime
-
 print("Total elapsed time is:")
 print(elapsedtime)
 
@@ -92,8 +100,7 @@ cm <- confusionMatrix(data = test.predict, reference = testing$classe)
 cm
 varImp(model)
 
-# now lets look at validation
-
+# now lets look at project validation
 validation <- read.csv(
     "data/pml-testing.csv", header = TRUE,
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
@@ -101,3 +108,4 @@ validation <- read.csv(
 answers <- predict(model, newdata = validation)
 # save answers
 saveRDS(answers, "data/answers-rf.rds")
+# see prepareanswers.R to process validation predictions

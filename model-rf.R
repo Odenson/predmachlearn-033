@@ -6,6 +6,9 @@
 # See http://www.listendata.com/2014/11/random-forest-with-r.html
 #
 
+# run this script from bash command line using
+# R --no-save < model-rf.R | tee run-rf.log
+
 require(dplyr, quietly = TRUE)
 require(caret, quietly = TRUE)
 # require(lubridate, quietly = TRUE)

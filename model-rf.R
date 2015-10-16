@@ -1,8 +1,7 @@
 #!/usr/bin/R --verbose
 
-# Notes on Random Forest
-# * Random forest is affected by multicollinearity but not by outlier problem.
-# * add proximity = TRUE; Should proximity measure among the rows be calculated?
+# Notes on Random Forest:
+# Random forest is affected by multi-collinearity but not by outlier problem.
 # See http://www.listendata.com/2014/11/random-forest-with-r.html
 #
 
@@ -11,8 +10,8 @@
 
 require(dplyr, quietly = TRUE)
 require(caret, quietly = TRUE)
-# require(lubridate, quietly = TRUE)
 require(ggplot2, quietly = TRUE)
+require(rfUtilities, quietly = TRUE)
 
 # load raw data
 raw <- read.csv(
@@ -56,11 +55,15 @@ nas.perc <- as.integer(0.95 * nrow(raw))
 nas <-
     sort(apply(raw, 2, function(x)
         length(which(is.na(x)))), decreasing = TRUE)
-bad.names <- names(nas[nas >= nas.perc])
-# print(bad.names)
-good.names <- setdiff(names(training), bad.names)
+nas.names <- names(nas[nas >= nas.perc])
+# print(nas.names)
+good.names <- setdiff(names(training), nas.names)
 # print(good.names)
 # exclude columns that do not aid in prediction (or are an outcome)
+# method: (inner to outer)
+# - paste together with OR condition all names to exclude
+# - grep returning inverted matched names (i.e. collect those that don't match)
+# - sort alphabetically to help us humans
 train.names <- sort(grep(
     paste("classe", "_window", "user_name", "X", "_timestamp", sep = "|"),
     good.names, value = TRUE, invert = TRUE)
@@ -69,6 +72,9 @@ train.names <- sort(grep(
 # use these names to generate training formula
 train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+")))
 print(train.formula)
+
+# check if any of these columns have problems with multi-collinearity
+multi.collinear(dplyr::select(training, one_of(train.names)))
 
 # model using random forest
 if (file.exists("data/model-rf.rds")) {
@@ -97,7 +103,7 @@ saveRDS(model, rds.filename)
 
 # test
 test.predict <- predict(model, newdata = testing)
-# get accuracy returns Accuracy and Kappa
+# print Accuracy and Kappa (measure of rating variable(s) agreement)
 postResample(test.predict, testing$classe)
 
 # show confusion matrix

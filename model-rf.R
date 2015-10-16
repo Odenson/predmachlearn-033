@@ -70,28 +70,30 @@ train.names <- sort(grep(
 train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+")))
 print(train.formula)
 
-# record start time of model build
-starttime <- proc.time()
-
 # model using random forest
-model <- train(train.formula, data = training, method = "rf",
-               proximity = TRUE, allowParallel = TRUE)
+if (file.exists("data/model-rf.rds")) {
+    print("Restoring model ...")
+    model <- readRDS("data/model-rf.rds")
+} else {
+    print("Building model ...")
+    # record start time of model build
+    starttime <- proc.time()
+    model <- train(train.formula, data = training, method = "rf")
+    # how long did this model take to build?
+    print(paste("Total elapsed time is:", (proc.time() - starttime)[["elapsed"]], "secs"))
+}
 
 # print some information on this model
 print(model$finalModel$problemType)
 print(model$method)
 print(model$finalModel$xNames)
 print(model$finalModel$obsLevels)
+print(model$finalModel$confusion)
 print(model$metric)
 
 # save model
 rds.filename <- paste0("data/model-", model$method, ".rds")
 saveRDS(model, rds.filename)
-
-# how long did model take to build?
-elapsedtime <- proc.time() - starttime
-print("Total elapsed time is:")
-print(elapsedtime)
 
 # test
 test.predict <- predict(model, newdata = testing)

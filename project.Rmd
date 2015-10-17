@@ -1,7 +1,7 @@
 ---
 title: "Predict Correct Use of Barbells"
 author: "Frank Jung"
-date: "14 October 2015"
+date: "17 October 2015"
 output:
   html_document:
     highlight: monochrome
@@ -27,7 +27,7 @@ raw$classe <- factor(raw$classe)
 
 ## Summary
 
-This report describes the algorithm used to predict how people did an exercise 
+This report describes the algorithm used to predict how people did an exercise
 of lifting a dumbbell. This is a classification problem where predictors are
 used to determine one of the five [outcomes](#goal). This report will:
 
@@ -35,93 +35,190 @@ used to determine one of the five [outcomes](#goal). This report will:
 * what choices were made for this model
 * how the model was cross validated
 * what the expected out of sample error is
-    
+
 Links to the data and further information of the research can be the
-[Reference](#references)
+[references](#references)
 
 ## Background
 
 Using devices such as [Jawbone Up](https://jawbone.com/up), [Nike
 FuelBand](http://www.nike.com/), and [Fitbit](https://www.fitbit.com) it is now
-possible to collect a large amount of data about personal activity relatively 
-inexpensively. These type of devices are part of the quantified self movement – 
-a group of enthusiasts who take measurements about themselves regularly to 
-improve their health, to find patterns in their behavior, or because they are 
-tech geeks. One thing that people regularly do is quantify how much of a 
-particular activity they do, but they rarely quantify how well they do it. 
+possible to collect a large amount of data about personal activity relatively
+inexpensively. These type of devices are part of the quantified self movement –
+a group of enthusiasts who take measurements about themselves regularly to
+improve their health, to find patterns in their behavior, or because they are
+tech geeks. One thing that people regularly do is quantify how much of a
+particular activity they do, but they rarely quantify how well they do it.
 
 ## Goal
 
-Our goal is to use data from accelerometers on the belt, forearm, arm, and 
-dumbbell of 6 participants to predict the manner in which people did an 
-exercise. They were asked to perform dumbbell lifts correctly 
-and incorrectly in 5 different ways:
+We wish to predict the the manner in which people did an exercise from data
+collected from accelerometers on the belt, forearm, arm, and dumbbell of 6
+participants. They were asked to perform dumbbell lifts correctly and
+incorrectly in 5 different ways:
 
 ```{r classe-table}
 classe.id <- c(levels(raw$classe))
-classe.desc <- c("exactly according to the specification", 
+classe.desc <- c("exactly according to the specification",
                  "throwing the elbows to the front",
                  "lifting the dumbbell only halfway",
                  "lowering the dumbbell only halfway",
                  "and throwing the hips to the front")
 classe.table <- data.frame(Classe = classe.id, Description = classe.desc)
-kable(classe.table)
+kable(classe.table, caption = "Classes of exercise activity")
 ```
-
-The goal of this project is to predict the manner in which people did an 
-exercise. This is recorded in the "classe" variable of the training set.
-
-
 
 ## Exploratory Analysis
 
+The data contains a large number (`r ncol(raw)`) of columns. However, many of
+these columns contain little or no information or contain an Excel ``#DIV/0!``
+conversion error. As a consequence we will exclude from the prediction formula
+all columns with a 95% or higher missing data.
 
-Actions:
+The ``classe`` field is a categorical outcome, which we will subsequently treat
+as a factor.
 
-(1) Will to convert Excel's '#DIV/0!' to NA.
-(2) Do not include row number field ``X``as not required regression model.
-(3) Factors
+A number of columns will also be excluded since they do not provide value to
+prediction. They are:
 
-```{r partition}
+| Column | Reason |
+|--------|--------|
+| ``X`` | Row index |
+| ``*_window``, ``*_timestamp*`` | measurements were made in time segments with overlap so they can be treated as discrete |
+| ``user_name`` | who performed the action is not relevant as all were supervised to ensure consistent actions |
+
+Table: Additional columns to ignore
+
+## Choice of Prediction Algorithm
+
+A good performing prediction algorithm for classification problems is [Random
+Forest](https://en.wikipedia.org/wiki/Random_forest). It is resilient to
+outliers but is affected by multi-collinearity, which will be tested for, later.
+
+The predictors used in the formula, were tested using
+[rfUtilities](http://cran.r-project.org/package=rfUtilities). No multi-collinear
+variables were identified.
+
+### Data Partitioning
+
+The [training data](#data) was partitioned into two partitions:
+
+* training (70%) - used to train model
+* testing (30%) - used for cross-validation, and error estimation
+
+```{r partition, echo = TRUE}
 # split into train (70%) and test (30%) on outcome (classe)
 rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
 training <- raw[rawindex,]
 testing <- raw[-rawindex,]
 ```
 
-```r
+### Training Formula
+
+The model formula is composed of all fields, **except**
+
+* columns that are more than 95% empty (i.e. NA)
+* non-predictive columns identified in [Table: Additional columns to ignore](#exploratory-analysis)
+
+Applying these conditions leads to the formula with an outcome ``classe`` of:
+
+```{r formula, fig.caption="Formula"}
 # ignore columns that are more than 95% empty (i.e. NA):
 nas.perc <- as.integer(0.95 * nrow(raw))
 nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
-bad.names <- sort(names(nas[nas >= 19216])); bad.names
-good.names <- setdiff(names(training), bad.names); good.names
+bad.names <- sort(names(nas[nas >= 19216]))
+good.names <- setdiff(names(training), bad.names)
 
 # exclude columns that do not aid in prediction (or are an outcome)
-train.names <- grep(paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"), good.names, value = TRUE, invert = TRUE); train.names
+train.names <- grep(paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"), good.names, value = TRUE, invert = TRUE)
 
 # use these column names to generate training formula
 train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+"))); train.formula
 ```
 
-Outcome = classe
+This will appear below in training as the variable ``train.formula``.
 
+### Training Model
 
-Split on time series or num_windows field:
-See http://topepo.github.io/caret/splitting.html
+The Random Forest was trained using [caret](http://caret.r-forge.r-project.org/
+) package with:
 
 ```r
-# select just num_window and classe from data frame
-train.unique <- unique(subset(training, select = c("num_window", "classe")))
+model <- train(train.formula, data = training, method = "rf")
+```
 
-# how many unique combinations of num_window and classe?
-nrow(train.unique)
-# [1] 858
+```{r train}
+# model using random forest
+if (file.exists("data/model-rf.rds")) {
+    model <- readRDS("data/model-rf.rds")
+}
+```
 
-# how many unique windows?
-length(unique(training$num_window))
-# [1] 858
+### Check Multi-Collinearity
 
-# so can use num_windows to create data partitions
+Multi-collinearity of the model was tested with:
+
+```{r, echo=TRUE}
+multi.collinear(dplyr::select(training, one_of(train.names)))
+```
+
+### Variable Importance
+
+A descending of importance list for the first 20 variables is:
+
+```{r importance}
+varImp(model)
+```
+
+## Testing
+
+The model was cross-validated against the test data with:
+
+```{r predict, echo = TRUE}
+test.predict <- predict(model, newdata = testing)
+```
+
+### Accuracy and Cohen Kappa
+
+The accuracy and Cohen [Kappa](https://en.wikipedia.org/wiki/Cohen%27s_kappa)
+statistics are:
+
+```{r accuracy}
+cm <- confusionMatrix(data = test.predict, reference = testing$classe)
+# ignore AccuracyNull(5) and McnemarPValue(7)
+overall.stats <- data.frame(Value = round(cm$overall[-c(5,7)], 3))
+kable(x = overall.stats, caption = "Overall Statistics")
+```
+
+    TODO in more detail
+    So the out-of-sample error is ...
+
+### Confusion Matrix
+
+The predictions [confusion
+matrix](https://en.wikipedia.org/wiki/Confusion_matrix) is:
+
+```{r confusionMatrix}
+byclass <- round(cm$byClass, 3)
+kable(byclass, caption = "Confusion Matrix")
+```
+
+## Validation
+
+The final model was run against the validation data with:
+
+```{r validation}
+validation <- read.csv(
+    "data/pml-testing.csv", header = TRUE,
+    na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
+)
+answers <- predict(model, newdata = validation)
+```
+
+Yielding the following predictions:
+
+```{r predictions}
+kable(data.frame(id = 1:20, Prediction = answers), caption = "Predictions")
 ```
 
 # Appendices
@@ -130,11 +227,12 @@ length(unique(training$num_window))
 
 * Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
 
-## Session Information
+## Data
 
-```{r environment}
-sessionInfo()
-```
+Data for this project was sourced from:
+
+* Training data, https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+* Validation data, https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
 ## GitHub
 

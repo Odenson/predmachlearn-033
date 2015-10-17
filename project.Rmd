@@ -233,9 +233,9 @@ Data for this project was sourced from:
 
 | Name | Description |
 |------|-------------|
+| answers.R | prepare predictions for submission |
 | getdata.R | download raw CSV data from remote sources |
 | model-rf.R | train random forest model |
-| prepareanswers.R | prepare predictions for submission |
 
 ### GitHub
 

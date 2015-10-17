@@ -240,4 +240,4 @@ Data for this project was sourced from:
 ### GitHub
 
 * [Source](https://github.com/frankhjung/predmachlearn-033)
-* [HTML Documentation](https://frankhjung.github.io/predmachlearn-033)
+* [HTML Report](https://frankhjung.github.io/predmachlearn-033/project.html)

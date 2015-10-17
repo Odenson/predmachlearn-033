@@ -205,36 +205,39 @@ kable(byclass, caption = "Confusion Matrix")
 
 ## Validation
 
-The final model was run against the validation data with:
+The final model was run against the validation data yielding the following
+predictions:
 
-```{r validation}
+```{r validation, echo = TRUE}
 validation <- read.csv(
     "data/pml-testing.csv", header = TRUE,
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
-answers <- predict(model, newdata = validation)
+predict(model, newdata = validation)
 ```
 
-Yielding the following predictions:
+## Appendices
 
-```{r predictions}
-kable(data.frame(id = 1:20, Prediction = answers), caption = "Predictions")
-```
-
-# Appendices
-
-## References
+### References
 
 * Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
 
-## Data
+### Data
 
 Data for this project was sourced from:
 
 * Training data, https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
 * Validation data, https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
-## GitHub
+### Scripts
+
+| Name | Description |
+|------|-------------|
+| getdata.R | download raw CSV data from remote sources |
+| model-rf.R | train random forest model |
+| prepareanswers.R | prepare predictions for submission |
+
+### GitHub
 
 * [Source](https://github.com/frankhjung/predmachlearn-033)
 * [HTML Documentation](https://frankhjung.github.io/predmachlearn-033)

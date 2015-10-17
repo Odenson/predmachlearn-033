@@ -146,7 +146,13 @@ cm
 # individually ...
 # overall statistics
 cm$overall
+
+# Variable Importance
+importance(model$finalModel)
 varImp(model)
+par(mfrow = c(1, 1), family = "sans", cex = 0.7)
+varImpPlot(model$finalModel, n.var = 20, main = "Variable Importance")
+
 # reference table
 cm$table
 # statistics by class
@@ -157,7 +163,7 @@ validation <- read.csv(
     "data/pml-testing.csv", header = TRUE,
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
-answers <- predict(model, newdata = validation)
+predictions <- predict(model, newdata = validation)
 # save answers
-saveRDS(answers, "data/answers-rf.rds")
-# see prepareanswers.R to process validation predictions
+saveRDS(predictions, "data/predictions-rf.rds")
+# see pred.R to process validation predictions

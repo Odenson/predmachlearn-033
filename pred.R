@@ -14,9 +14,9 @@ pml_write_files = function(x) {
 # MAIN
 #
 
-if (file.exists("data/answers-rf.rds")) {
-    print("Restoring answers ...")
-    answers <- readRDS("data/answers-rf.rds")
+if (file.exists("data/predictions-rf.rds")) {
+    print("Restoring predictions ...")
+    predictions <- readRDS("data/predictions-rf.rds")
 }
 
-pml_write_files(answers)
+pml_write_files(predictions)

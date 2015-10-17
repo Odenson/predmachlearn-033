@@ -1,5 +1,5 @@
 ---
-title: "Predict Correct Use of Barbells"
+title: "Predict Correct Use of Dumbbells"
 author: "Frank Jung"
 date: "17 October 2015"
 output:
@@ -70,13 +70,12 @@ kable(classe.table, caption = "Classes of exercise activity")
 
 ## Exploratory Analysis
 
+The ``classe`` field is a categorical outcome, which we will treat as a factor.
+
 The data contains a large number (`r ncol(raw)`) of columns. However, many of
 these columns contain little or no information or contain an Excel ``#DIV/0!``
-conversion error. As a consequence we will exclude from the prediction formula
+conversion error. Consequently, we will exclude from the prediction formula
 all columns with a 95% or higher missing data.
-
-The ``classe`` field is a categorical outcome, which we will subsequently treat
-as a factor.
 
 A number of columns will also be excluded since they do not provide value to
 prediction. They are:
@@ -84,7 +83,7 @@ prediction. They are:
 | Column | Reason |
 |--------|--------|
 | ``X`` | Row index |
-| ``*_window``, ``*_timestamp*`` | measurements were made in time segments with overlap so they can be treated as discrete |
+| ``*_window``, ``*_timestamp*`` | measurements were made in time segments with overlap so they can be treated as discrete and not time dependent |
 | ``user_name`` | who performed the action is not relevant as all were supervised to ensure consistent actions |
 
 Table: Additional columns to ignore
@@ -164,10 +163,17 @@ multi.collinear(dplyr::select(training, one_of(train.names)))
 
 ### Variable Importance
 
-A descending of importance list for the first 20 variables is:
+Below is an abbreviated list of variable importance:
 
 ```{r importance}
 varImp(model)
+
+# full list with
+# importance(model$finalModel)
+
+# plot with
+# par(mfrow = c(1, 1), family = "sans", cex = 0.7)
+# varImpPlot(model$finalModel, n.var = 20, main = "Variable Importance")
 ```
 
 ## Testing
@@ -190,9 +196,6 @@ overall.stats <- data.frame(Value = round(cm$overall[-c(5,7)], 3))
 kable(x = overall.stats, caption = "Overall Statistics")
 ```
 
-    TODO in more detail
-    So the out-of-sample error is ...
-
 ### Confusion Matrix
 
 The predictions [confusion
@@ -208,13 +211,16 @@ kable(byclass, caption = "Confusion Matrix")
 The final model was run against the validation data yielding the following
 predictions:
 
-```{r validation, echo = TRUE}
+```r
 validation <- read.csv(
     "data/pml-testing.csv", header = TRUE,
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
-predict(model, newdata = validation)
+predictions <- predict(model, newdata = validation)
+saveRDS(predictions, "data/predictions-rf.rds")
 ```
+
+The predictions are then processed using the [script](scripts) ``pred.R``
 
 ## Appendices
 
@@ -233,9 +239,9 @@ Data for this project was sourced from:
 
 | Name | Description |
 |------|-------------|
-| answers.R | prepare predictions for submission |
 | getdata.R | download raw CSV data from remote sources |
 | model-rf.R | train random forest model |
+| pred.R | prepare predictions for submission |
 
 ### GitHub
 

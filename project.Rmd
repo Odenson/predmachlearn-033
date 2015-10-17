@@ -8,10 +8,73 @@ output:
     toc: yes
 ---
 
-```{r initialisation, echo=TRUE, message=TRUE, warning=TRUE}
+```{r initialisation, echo=FALSE, message=FALSE, warning=FALSE}
 require(knitr, quietly = TRUE)
 require(caret, quietly = TRUE)
+require(dplyr, quietly = TRUE)
+require(ggplot2, quietly = TRUE)
+require(rfUtilities, quietly = TRUE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
+
+```{r load, echo=FALSE}
+# load raw data
+raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
+
+# set classe as a factor
+raw$classe <- factor(raw$classe)
+```
+
+## Summary
+
+This report describes the algorithm used to predict how people did an exercise 
+of lifting a dumbbell. This is a classification problem where predictors are
+used to determine one of the five [outcomes](#goal). This report will:
+
+* describe how the model was built
+* what choices were made for this model
+* how the model was cross validated
+* what the expected out of sample error is
+    
+Links to the data and further information of the research can be the
+[Reference](#references)
+
+## Background
+
+Using devices such as [Jawbone Up](https://jawbone.com/up), [Nike
+FuelBand](http://www.nike.com/), and [Fitbit](https://www.fitbit.com) it is now
+possible to collect a large amount of data about personal activity relatively 
+inexpensively. These type of devices are part of the quantified self movement – 
+a group of enthusiasts who take measurements about themselves regularly to 
+improve their health, to find patterns in their behavior, or because they are 
+tech geeks. One thing that people regularly do is quantify how much of a 
+particular activity they do, but they rarely quantify how well they do it. 
+
+## Goal
+
+Our goal is to use data from accelerometers on the belt, forearm, arm, and 
+dumbbell of 6 participants to predict the manner in which people did an 
+exercise. They were asked to perform dumbbell lifts correctly 
+and incorrectly in 5 different ways:
+
+```{r classe-table}
+classe.id <- c(levels(raw$classe))
+classe.desc <- c("exactly according to the specification", 
+                 "throwing the elbows to the front",
+                 "lifting the dumbbell only halfway",
+                 "lowering the dumbbell only halfway",
+                 "and throwing the hips to the front")
+classe.table <- data.frame(Classe = classe.id, Description = classe.desc)
+kable(classe.table)
+```
+
+The goal of this project is to predict the manner in which people did an 
+exercise. This is recorded in the "classe" variable of the training set.
+
+
+
+## Exploratory Analysis
+
 
 Actions:
 
@@ -19,19 +82,14 @@ Actions:
 (2) Do not include row number field ``X``as not required regression model.
 (3) Factors
 
-
-```{r load, echo=TRUE}
-# load raw data
-raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
-
-# set classe as a factor
-raw$classe <- factor(raw$classe)
-
+```{r partition}
 # split into train (70%) and test (30%) on outcome (classe)
 rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
 training <- raw[rawindex,]
 testing <- raw[-rawindex,]
+```
 
+```r
 # ignore columns that are more than 95% empty (i.e. NA):
 nas.perc <- as.integer(0.95 * nrow(raw))
 nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
@@ -77,3 +135,8 @@ length(unique(training$num_window))
 ```{r environment}
 sessionInfo()
 ```
+
+## GitHub
+
+* [Source](https://github.com/frankhjung/predmachlearn-033)
+* [HTML Documentation](https://frankhjung.github.io/predmachlearn-033)

@@ -73,11 +73,13 @@ img {
 
 <div id="TOC">
 <ul>
-<li><a href="#summary">Summary</a></li>
+<li><a href="#summary">Summary</a><ul>
 <li><a href="#background">Background</a></li>
 <li><a href="#goal">Goal</a></li>
+</ul></li>
 <li><a href="#exploratory-analysis">Exploratory Analysis</a></li>
-<li><a href="#choice-of-prediction-algorithm">Choice of Prediction Algorithm</a><ul>
+<li><a href="#training">Training</a><ul>
+<li><a href="#choice-of-prediction-algorithm">Choice of Prediction Algorithm</a></li>
 <li><a href="#data-partitioning">Data Partitioning</a></li>
 <li><a href="#training-formula">Training Formula</a></li>
 <li><a href="#training-model">Training Model</a></li>
@@ -110,13 +112,12 @@ img {
 <li><a href="#estimation-of-error-rate">what the expected out of sample error is</a></li>
 </ul>
 <p>Links to the data and further information of the research can be the <a href="#references">references</a></p>
-</div>
-<div id="background" class="section level2">
-<h2>Background</h2>
+<div id="background" class="section level3">
+<h3>Background</h3>
 <p>Using devices such as <a href="https://jawbone.com/up">Jawbone Up</a>, <a href="http://www.nike.com/">Nike FuelBand</a>, and <a href="https://www.fitbit.com">Fitbit</a> it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.</p>
 </div>
-<div id="goal" class="section level2">
-<h2>Goal</h2>
+<div id="goal" class="section level3">
+<h3>Goal</h3>
 <p>We wish to predict the the manner in which people did an exercise from data collected from accelerometers on the belt, forearm, arm, and dumbbell of 6 participants. They were asked to perform dumbbell lifts correctly and incorrectly in 5 different ways:</p>
 <table>
 <caption>Classes of exercise activity</caption>
@@ -150,6 +151,7 @@ img {
 </tbody>
 </table>
 </div>
+</div>
 <div id="exploratory-analysis" class="section level2">
 <h2>Exploratory Analysis</h2>
 <p>The <code>classe</code> field is a categorical outcome, which we will treat as a factor.</p>
@@ -179,10 +181,13 @@ img {
 </tbody>
 </table>
 </div>
-<div id="choice-of-prediction-algorithm" class="section level2">
-<h2>Choice of Prediction Algorithm</h2>
+<div id="training" class="section level2">
+<h2>Training</h2>
+<div id="choice-of-prediction-algorithm" class="section level3">
+<h3>Choice of Prediction Algorithm</h3>
 <p>A good performing prediction algorithm for classification problems is <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a>. It is resilient to outliers but is affected by multi-collinearity, which will be tested for, later.</p>
 <p>The predictors used in the formula, were tested using <a href="http://cran.r-project.org/package=rfUtilities">rfUtilities</a>. No multi-collinear variables were identified.</p>
+</div>
 <div id="data-partitioning" class="section level3">
 <h3>Data Partitioning</h3>
 <p>The <a href="#data">training data</a> was partitioned into two partitions:</p>
@@ -273,7 +278,7 @@ missClassified &lt;-<span class="st"> </span>function(trueValues, predictValues)
     <span class="kw">sum</span>(trueValues !=<span class="st"> </span>predictValues) /<span class="st"> </span><span class="kw">length</span>(trueValues)
 }
 errorRate &lt;-<span class="st"> </span><span class="kw">missClassified</span>(testing$classe, testPredict)</code></pre>
-<p>For this model we have an estimated error rate of <strong>0.935%</strong>.</p>
+<p>The estimated error rate for this model is <strong>0.935 %</strong>.</p>
 </div>
 <div id="accuracy-and-cohen-kappa" class="section level3">
 <h3>Accuracy and Cohen Kappa</h3>
@@ -466,9 +471,9 @@ validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] rfUtilities_1.0-2   randomForest_4.6-12 scales_0.3.0       
-## [4] dplyr_0.4.3         caret_6.0-57        ggplot2_1.0.1      
-## [7] lattice_0.20-33     knitr_1.11          MASS_7.3-44        
+## [1] rfUtilities_1.0-2   randomForest_4.6-12 dplyr_0.4.3        
+## [4] caret_6.0-57        ggplot2_1.0.1       lattice_0.20-33    
+## [7] knitr_1.11          MASS_7.3-44        
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] Rcpp_0.12.1        highr_0.5.1        formatR_1.2.1     
@@ -482,10 +487,10 @@ validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(
 ## [25] stats4_3.2.2       grid_3.2.2         nnet_7.3-11       
 ## [28] R6_2.1.1           rmarkdown_0.8.1    minqa_1.2.4       
 ## [31] reshape2_1.4.1     car_2.1-0          magrittr_1.5      
-## [34] codetools_0.2-14   htmltools_0.2.6    splines_3.2.2     
-## [37] assertthat_0.1     pbkrtest_0.4-2     colorspace_1.2-6  
-## [40] quantreg_5.19      stringi_0.5-5      lazyeval_0.1.10   
-## [43] munsell_0.4.2</code></pre>
+## [34] scales_0.3.0       codetools_0.2-14   htmltools_0.2.6   
+## [37] splines_3.2.2      assertthat_0.1     pbkrtest_0.4-2    
+## [40] colorspace_1.2-6   quantreg_5.19      stringi_0.5-5     
+## [43] lazyeval_0.1.10    munsell_0.4.2</code></pre>
 </div>
 </div>
 

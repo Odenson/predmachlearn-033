@@ -104,21 +104,21 @@ img {
 
 <div id="summary" class="section level2">
 <h2>Summary</h2>
-<p>This report describes the algorithm used to predict how people did an exercise of lifting a dumbbell. This is a classification problem where predictors are used to determine one of the five <a href="#goal">outcomes</a>. This report will:</p>
+<p>This report describes the algorithm used to predict how well people perform the exercise of lifting a dumbbell. This is a classification problem where predictors are used to determine one of five <a href="#goal">outcomes</a>. This report will:</p>
 <ul>
 <li><a href="#training-model">describe how the model was built</a></li>
 <li><a href="#choice-of-prediction-algorithm">what choices were made for this model</a></li>
 <li><a href="#testing">how the model was cross validated</a></li>
 <li><a href="#estimation-of-error-rate">what the expected out of sample error is</a></li>
 </ul>
-<p>Links to the data and further information of the research can be the <a href="#references">references</a></p>
+<p>Links to the data and further information of the research can be the <a href="#references">appendices</a>.</p>
 <div id="background" class="section level3">
 <h3>Background</h3>
-<p>Using devices such as <a href="https://jawbone.com/up">Jawbone Up</a>, <a href="http://www.nike.com/">Nike FuelBand</a>, and <a href="https://www.fitbit.com">Fitbit</a> it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.</p>
+<p>Using devices such as <a href="https://jawbone.com/up">Jawbone Up</a>, <a href="http://www.nike.com/">Nike FuelBand</a>, and <a href="https://www.fitbit.com">Fitbit</a> it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement, a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.</p>
 </div>
 <div id="goal" class="section level3">
 <h3>Goal</h3>
-<p>We wish to predict the the manner in which people did an exercise from data collected from accelerometers on the belt, forearm, arm, and dumbbell of 6 participants. They were asked to perform dumbbell lifts correctly and incorrectly in 5 different ways:</p>
+<p>Here we wish to predict the manner in which people do an exercise from data collected from accelerometers on the belt, forearm, arm, and dumbbell of 6 participants. They were asked to perform dumbbell lifts correctly and incorrectly in 5 different ways:</p>
 <table>
 <caption>Classes of exercise activity</caption>
 <thead>
@@ -150,12 +150,13 @@ img {
 </tr>
 </tbody>
 </table>
+<p>The prediction algorithm will determine which classification an exercise falls into.</p>
 </div>
 </div>
 <div id="exploratory-analysis" class="section level2">
 <h2>Exploratory Analysis</h2>
 <p>The <code>classe</code> field is a categorical outcome, which we will treat as a factor.</p>
-<p>The data contains a large number (160) of columns. However, many of these columns contain little or no information or contain an Excel <code>#DIV/0!</code> conversion error. Consequently, we will exclude from the prediction formula all columns with a 95% or higher missing data.</p>
+<p>The data contains a large number (160) of columns. However, many of these columns contain little or no information or contain an Excel <code>#DIV/0!</code> conversion error. Consequently, we will exclude from the prediction formula all columns with a 95% or higher of missing data.</p>
 <p>A number of columns will also be excluded since they do not provide value to prediction. They are:</p>
 <table>
 <caption>Additional columns to ignore</caption>
@@ -168,7 +169,7 @@ img {
 <tbody>
 <tr class="odd">
 <td align="left"><code>X</code></td>
-<td align="left">Row index</td>
+<td align="left">Row index not related to a measurement</td>
 </tr>
 <tr class="even">
 <td align="left"><code>*_window</code>, <code>*_timestamp*</code></td>
@@ -185,15 +186,15 @@ img {
 <h2>Training</h2>
 <div id="choice-of-prediction-algorithm" class="section level3">
 <h3>Choice of Prediction Algorithm</h3>
-<p>A good performing prediction algorithm for classification problems is <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a>. It is resilient to outliers but is affected by multi-collinearity, which will be tested for, later.</p>
-<p>The predictors used in the formula, were tested using <a href="http://cran.r-project.org/package=rfUtilities">rfUtilities</a>. No multi-collinear variables were identified.</p>
+<p>A good performing prediction algorithm for classification problems is <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a>. It is resilient to outliers but is affected by multi-collinearity, which will <a href="#check-multi-collinearity">later be tested</a> for.</p>
+<p>The predictors used in the formula, were tested using <a href="http://cran.r-project.org/package=rfUtilities">rfUtilities</a>.</p>
 </div>
 <div id="data-partitioning" class="section level3">
 <h3>Data Partitioning</h3>
-<p>The <a href="#data">training data</a> was partitioned into two partitions:</p>
+<p>The <a href="#data">training data</a> was partitioned into two:</p>
 <ul>
 <li>training (70%) - used to train model</li>
-<li>testing (30%) - used for cross-validation, and error estimation</li>
+<li>testing (30%) - used for <a href="#testing">cross-validation</a>, and estimate of <a href="#estimation-of-error-rate">error rate</a></li>
 </ul>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># split into train (70%) and test (30%) on outcome (classe)</span>
 <span class="kw">set.seed</span>(<span class="dv">033</span>)
@@ -209,6 +210,17 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <li>non-predictive columns identified in <a href="#exploratory-analysis">Table: Additional columns to ignore</a></li>
 </ul>
 <p>Applying these conditions gives the formula:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># ignore columns that are more than 95% empty (i.e. NA):</span>
+nasPerc &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="fl">0.95</span> *<span class="st"> </span><span class="kw">nrow</span>(raw))
+nas &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">apply</span>(raw, <span class="dv">2</span>, function(x) <span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(x)))), <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
+badNames &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">names</span>(nas[nas &gt;=<span class="st"> </span><span class="dv">19216</span>]))
+goodNames &lt;-<span class="st"> </span><span class="kw">setdiff</span>(<span class="kw">names</span>(training), badNames)
+
+<span class="co"># exclude columns that do not aid in prediction (or are an outcome)</span>
+trainNames &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="kw">paste</span>(<span class="st">&quot;classe&quot;</span>, <span class="st">&quot;window&quot;</span>, <span class="st">&quot;user_name&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;_timestamp&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;|&quot;</span>), goodNames, <span class="dt">value =</span> <span class="ot">TRUE</span>, <span class="dt">invert =</span> <span class="ot">TRUE</span>)
+
+<span class="co"># use these column names to generate training formula</span>
+trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<span class="kw">paste</span>(<span class="st">&quot;classe ~ &quot;</span>, <span class="kw">paste</span>(trainNames, <span class="dt">collapse =</span> <span class="st">&quot;+&quot;</span>))); trainFormula</code></pre>
 <pre><code>## classe ~ roll_belt + pitch_belt + yaw_belt + total_accel_belt + 
 ##     gyros_belt_x + gyros_belt_y + gyros_belt_z + accel_belt_x + 
 ##     accel_belt_y + accel_belt_z + magnet_belt_x + magnet_belt_y + 
@@ -238,7 +250,7 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 </div>
 <div id="variable-importance" class="section level3">
 <h3>Variable Importance</h3>
-<p>Below is an abbreviated list of variable importance:</p>
+<p>Below is an abbreviated list of the models variable importance:</p>
 <pre><code>## rf variable importance
 ## 
 ##   only 20 most important variables shown (out of 52)
@@ -395,14 +407,14 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 </div>
 <div id="validation" class="section level2">
 <h2>Validation</h2>
-<p>The final model was run against the validation data yielding the following predictions:</p>
+<p>The final model was run against the validation data:</p>
 <pre class="sourceCode r"><code class="sourceCode r">validation &lt;-<span class="st"> </span><span class="kw">read.csv</span>(
     <span class="st">&quot;data/pml-testing.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>,
     <span class="dt">na.strings =</span> <span class="kw">c</span>(<span class="st">&quot;NA&quot;</span>, <span class="st">&quot;#DIV/0!&quot;</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>
 )
 validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> validation)
 <span class="kw">saveRDS</span>(validationPredict, <span class="st">&quot;data/predictions-rf.rds&quot;</span>)</code></pre>
-<p>The predictions are then processed using the <a href="#scripts">script</a> <code>pred.R</code></p>
+<p>These predictions are then processed using the <a href="#scripts">script</a> <code>pred.R</code> prior to submission for independent evaluation.</p>
 </div>
 <div id="appendices" class="section level2">
 <h2>Appendices</h2>

@@ -193,13 +193,13 @@ Since this is categorical data, estimate using an accuracy measure:
 
 ```{r errorEstimate, echo = TRUE}
 # estimate error (since this is categorical data we are estimating accuracy)
-missClassified <- function(trueValues, predictValues) {
+errorRate <- function(trueValues, predictValues) {
     sum(trueValues != predictValues) / length(trueValues)
 }
-errorRate <- missClassified(testing$classe, testPredict)
+estimated <- errorRate(testing$classe, testPredict)
 ```
 
-The estimated error rate for this model is **`r round(100 * errorRate, 3)` %**.
+The estimated error rate for this model is **`r round(100 * estimated, 3)`%**.
 
 ### Accuracy and Cohen Kappa
 
@@ -237,7 +237,7 @@ validationPredict <- predict(model, newdata = validation)
 saveRDS(validationPredict, "data/predictions-rf.rds")
 ```
 
-The predictions are then processed using the [script](scripts) ``pred.R``
+The predictions are then processed using the [script](#scripts) ``pred.R``
 
 ## Appendices
 

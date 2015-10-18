@@ -274,11 +274,11 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <h3>Estimation of Error Rate</h3>
 <p>Since this is categorical data, estimate using an accuracy measure:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># estimate error (since this is categorical data we are estimating accuracy)</span>
-missClassified &lt;-<span class="st"> </span>function(trueValues, predictValues) {
+errorRate &lt;-<span class="st"> </span>function(trueValues, predictValues) {
     <span class="kw">sum</span>(trueValues !=<span class="st"> </span>predictValues) /<span class="st"> </span><span class="kw">length</span>(trueValues)
 }
-errorRate &lt;-<span class="st"> </span><span class="kw">missClassified</span>(testing$classe, testPredict)</code></pre>
-<p>The estimated error rate for this model is <strong>0.935 %</strong>.</p>
+estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testing$classe, testPredict)</code></pre>
+<p>The estimated error rate for this model is <strong>0.935%</strong>.</p>
 </div>
 <div id="accuracy-and-cohen-kappa" class="section level3">
 <h3>Accuracy and Cohen Kappa</h3>
@@ -402,7 +402,7 @@ errorRate &lt;-<span class="st"> </span><span class="kw">missClassified</span>(t
 )
 validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> validation)
 <span class="kw">saveRDS</span>(validationPredict, <span class="st">&quot;data/predictions-rf.rds&quot;</span>)</code></pre>
-<p>The predictions are then processed using the <a href="scripts">script</a> <code>pred.R</code></p>
+<p>The predictions are then processed using the <a href="#scripts">script</a> <code>pred.R</code></p>
 </div>
 <div id="appendices" class="section level2">
 <h2>Appendices</h2>

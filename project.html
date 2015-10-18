@@ -10,7 +10,7 @@
 
 <meta name="author" content="Frank Jung" />
 
-<meta name="date" content="2015-10-17" />
+<meta name="date" content="2015-10-18" />
 
 <title>Predict Correct Use of Dumbbells</title>
 
@@ -68,7 +68,7 @@ img {
 <div id="header">
 <h1 class="title">Predict Correct Use of Dumbbells</h1>
 <h4 class="author"><em>Frank Jung</em></h4>
-<h4 class="date"><em>17 October 2015</em></h4>
+<h4 class="date"><em>18 October 2015</em></h4>
 </div>
 
 <div id="TOC">
@@ -85,6 +85,7 @@ img {
 <li><a href="#variable-importance">Variable Importance</a></li>
 </ul></li>
 <li><a href="#testing">Testing</a><ul>
+<li><a href="#estimation-of-error-rate">Estimation of Error Rate</a></li>
 <li><a href="#accuracy-and-cohen-kappa">Accuracy and Cohen Kappa</a></li>
 <li><a href="#confusion-matrix">Confusion Matrix</a></li>
 </ul></li>
@@ -94,6 +95,7 @@ img {
 <li><a href="#data">Data</a></li>
 <li><a href="#scripts">Scripts</a></li>
 <li><a href="#github">GitHub</a></li>
+<li><a href="#session-information">Session Information</a></li>
 </ul></li>
 </ul>
 </div>
@@ -102,10 +104,10 @@ img {
 <h2>Summary</h2>
 <p>This report describes the algorithm used to predict how people did an exercise of lifting a dumbbell. This is a classification problem where predictors are used to determine one of the five <a href="#goal">outcomes</a>. This report will:</p>
 <ul>
-<li>describe how the model was built</li>
-<li>what choices were made for this model</li>
-<li>how the model was cross validated</li>
-<li>what the expected out of sample error is</li>
+<li><a href="#training-model">describe how the model was built</a></li>
+<li><a href="#choice-of-prediction-algorithm">what choices were made for this model</a></li>
+<li><a href="#testing">how the model was cross validated</a></li>
+<li><a href="#estimation-of-error-rate">what the expected out of sample error is</a></li>
 </ul>
 <p>Links to the data and further information of the research can be the <a href="#references">references</a></p>
 </div>
@@ -189,6 +191,7 @@ img {
 <li>testing (30%) - used for cross-validation, and error estimation</li>
 </ul>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># split into train (70%) and test (30%) on outcome (classe)</span>
+<span class="kw">set.seed</span>(<span class="dv">033</span>)
 rawindex &lt;-<span class="st"> </span><span class="kw">createDataPartition</span>(raw$classe, <span class="dt">p =</span> <span class="fl">0.7</span>, <span class="dt">list =</span> <span class="ot">FALSE</span>)
 training &lt;-<span class="st"> </span>raw[rawindex,]
 testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
@@ -200,7 +203,7 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <li>columns that are more than 95% empty (i.e. NA)</li>
 <li>non-predictive columns identified in <a href="#exploratory-analysis">Table: Additional columns to ignore</a></li>
 </ul>
-<p>Applying these conditions leads to the formula with an outcome <code>classe</code> of:</p>
+<p>Applying these conditions gives the formula:</p>
 <pre><code>## classe ~ roll_belt + pitch_belt + yaw_belt + total_accel_belt + 
 ##     gyros_belt_x + gyros_belt_y + gyros_belt_z + accel_belt_x + 
 ##     accel_belt_y + accel_belt_z + magnet_belt_x + magnet_belt_y + 
@@ -215,17 +218,17 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 ##     gyros_forearm_x + gyros_forearm_y + gyros_forearm_z + accel_forearm_x + 
 ##     accel_forearm_y + accel_forearm_z + magnet_forearm_x + magnet_forearm_y + 
 ##     magnet_forearm_z</code></pre>
-<p>This will appear below in training as the variable <code>train.formula</code>.</p>
+<p>This will appear below in training as the variable <code>trainFormula</code>.</p>
 </div>
 <div id="training-model" class="section level3">
 <h3>Training Model</h3>
 <p>The Random Forest was trained using <a href="http://caret.r-forge.r-project.org/">caret</a> package with:</p>
-<pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">train</span>(train.formula, <span class="dt">data =</span> training, <span class="dt">method =</span> <span class="st">&quot;rf&quot;</span>)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">train</span>(trainFormula, <span class="dt">data =</span> training, <span class="dt">method =</span> <span class="st">&quot;rf&quot;</span>)</code></pre>
 </div>
 <div id="check-multi-collinearity" class="section level3">
 <h3>Check Multi-Collinearity</h3>
 <p>Multi-collinearity of the model was tested with:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">multi.collinear</span>(dplyr::<span class="kw">select</span>(training, <span class="kw">one_of</span>(train.names)))</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">multi.collinear</span>(dplyr::<span class="kw">select</span>(training, <span class="kw">one_of</span>(trainNames)))</code></pre>
 <pre><code>## [1] &quot; NO MULTICOLINEAR VARIABLES IDENTIFIED&quot;</code></pre>
 </div>
 <div id="variable-importance" class="section level3">
@@ -261,7 +264,17 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <div id="testing" class="section level2">
 <h2>Testing</h2>
 <p>The model was cross-validated against the test data with:</p>
-<pre class="sourceCode r"><code class="sourceCode r">test.predict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> testing)</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r">testPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> testing)</code></pre>
+<div id="estimation-of-error-rate" class="section level3">
+<h3>Estimation of Error Rate</h3>
+<p>Since this is categorical data, estimate using an accuracy measure:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># estimate error (since this is categorical data we are estimating accuracy)</span>
+missClassified &lt;-<span class="st"> </span>function(trueValues, predictValues) {
+    <span class="kw">sum</span>(trueValues !=<span class="st"> </span>predictValues) /<span class="st"> </span><span class="kw">length</span>(trueValues)
+}
+errorRate &lt;-<span class="st"> </span><span class="kw">missClassified</span>(testing$classe, testPredict)</code></pre>
+<p>For this model we have an estimated error rate of <strong>0.935%</strong>.</p>
+</div>
 <div id="accuracy-and-cohen-kappa" class="section level3">
 <h3>Accuracy and Cohen Kappa</h3>
 <p>The accuracy and Cohen <a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa">Kappa</a> statistics are:</p>
@@ -276,19 +289,19 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <tbody>
 <tr class="odd">
 <td align="left">Accuracy</td>
-<td align="right">0.997</td>
+<td align="right">0.991</td>
 </tr>
 <tr class="even">
 <td align="left">Kappa</td>
-<td align="right">0.997</td>
+<td align="right">0.988</td>
 </tr>
 <tr class="odd">
 <td align="left">AccuracyLower</td>
-<td align="right">0.996</td>
+<td align="right">0.988</td>
 </tr>
 <tr class="even">
 <td align="left">AccuracyUpper</td>
-<td align="right">0.998</td>
+<td align="right">0.993</td>
 </tr>
 <tr class="odd">
 <td align="left">AccuracyPValue</td>
@@ -318,58 +331,58 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <tbody>
 <tr class="odd">
 <td align="left">Class: A</td>
-<td align="right">0.999</td>
-<td align="right">0.999</td>
+<td align="right">0.997</td>
 <td align="right">0.998</td>
-<td align="right">1.000</td>
+<td align="right">0.996</td>
+<td align="right">0.999</td>
 <td align="right">0.284</td>
 <td align="right">0.284</td>
 <td align="right">0.285</td>
-<td align="right">0.999</td>
+<td align="right">0.998</td>
 </tr>
 <tr class="even">
 <td align="left">Class: B</td>
-<td align="right">0.996</td>
-<td align="right">0.999</td>
+<td align="right">0.989</td>
 <td align="right">0.997</td>
-<td align="right">0.999</td>
+<td align="right">0.987</td>
+<td align="right">0.997</td>
 <td align="right">0.194</td>
-<td align="right">0.193</td>
-<td align="right">0.193</td>
-<td align="right">0.998</td>
+<td align="right">0.192</td>
+<td align="right">0.194</td>
+<td align="right">0.993</td>
 </tr>
 <tr class="odd">
 <td align="left">Class: C</td>
-<td align="right">0.999</td>
-<td align="right">0.998</td>
 <td align="right">0.990</td>
-<td align="right">1.000</td>
-<td align="right">0.174</td>
-<td align="right">0.174</td>
-<td align="right">0.176</td>
+<td align="right">0.994</td>
+<td align="right">0.973</td>
 <td align="right">0.998</td>
+<td align="right">0.174</td>
+<td align="right">0.173</td>
+<td align="right">0.177</td>
+<td align="right">0.992</td>
 </tr>
 <tr class="even">
 <td align="left">Class: D</td>
-<td align="right">0.991</td>
+<td align="right">0.972</td>
 <td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">0.998</td>
-<td align="right">0.164</td>
-<td align="right">0.162</td>
-<td align="right">0.162</td>
+<td align="right">0.999</td>
 <td align="right">0.995</td>
+<td align="right">0.164</td>
+<td align="right">0.159</td>
+<td align="right">0.159</td>
+<td align="right">0.986</td>
 </tr>
 <tr class="odd">
 <td align="left">Class: E</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
-<td align="right">1.000</td>
+<td align="right">0.999</td>
+<td align="right">0.999</td>
+<td align="right">0.996</td>
 <td align="right">1.000</td>
 <td align="right">0.184</td>
 <td align="right">0.184</td>
 <td align="right">0.184</td>
-<td align="right">1.000</td>
+<td align="right">0.999</td>
 </tr>
 </tbody>
 </table>
@@ -382,8 +395,8 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
     <span class="st">&quot;data/pml-testing.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>,
     <span class="dt">na.strings =</span> <span class="kw">c</span>(<span class="st">&quot;NA&quot;</span>, <span class="st">&quot;#DIV/0!&quot;</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>
 )
-predictions &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> validation)
-<span class="kw">saveRDS</span>(predictions, <span class="st">&quot;data/predictions-rf.rds&quot;</span>)</code></pre>
+validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> validation)
+<span class="kw">saveRDS</span>(validationPredict, <span class="st">&quot;data/predictions-rf.rds&quot;</span>)</code></pre>
 <p>The predictions are then processed using the <a href="scripts">script</a> <code>pred.R</code></p>
 </div>
 <div id="appendices" class="section level2">
@@ -433,6 +446,46 @@ predictions &lt;-<span class="st"> </span><span class="kw">predict</span>(model,
 <li><a href="https://github.com/frankhjung/predmachlearn-033">Source</a></li>
 <li><a href="https://frankhjung.github.io/predmachlearn-033/project.html">HTML Report</a></li>
 </ul>
+</div>
+<div id="session-information" class="section level3">
+<h3>Session Information</h3>
+<p>This report was produced using the following environment:</p>
+<pre><code>## R version 3.2.2 (2015-08-14)
+## Platform: x86_64-pc-linux-gnu (64-bit)
+## Running under: Linux Mint LMDE
+## 
+## locale:
+##  [1] LC_CTYPE=en_AU.UTF-8       LC_NUMERIC=C              
+##  [3] LC_TIME=en_AU.UTF-8        LC_COLLATE=en_AU.UTF-8    
+##  [5] LC_MONETARY=en_AU.UTF-8    LC_MESSAGES=en_AU.UTF-8   
+##  [7] LC_PAPER=en_AU.UTF-8       LC_NAME=C                 
+##  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+## [11] LC_MEASUREMENT=en_AU.UTF-8 LC_IDENTIFICATION=C       
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] rfUtilities_1.0-2   randomForest_4.6-12 scales_0.3.0       
+## [4] dplyr_0.4.3         caret_6.0-57        ggplot2_1.0.1      
+## [7] lattice_0.20-33     knitr_1.11          MASS_7.3-44        
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rcpp_0.12.1        highr_0.5.1        formatR_1.2.1     
+##  [4] nloptr_1.0.4       plyr_1.8.3         class_7.3-14      
+##  [7] iterators_1.0.8    tools_3.2.2        digest_0.6.8      
+## [10] lme4_1.1-10        evaluate_0.8       gtable_0.1.2      
+## [13] nlme_3.1-122       mgcv_1.8-7         Matrix_1.2-2      
+## [16] foreach_1.4.3      DBI_0.3.1          yaml_2.1.13       
+## [19] parallel_3.2.2     SparseM_1.7        proto_0.3-10      
+## [22] e1071_1.6-7        stringr_1.0.0      MatrixModels_0.4-1
+## [25] stats4_3.2.2       grid_3.2.2         nnet_7.3-11       
+## [28] R6_2.1.1           rmarkdown_0.8.1    minqa_1.2.4       
+## [31] reshape2_1.4.1     car_2.1-0          magrittr_1.5      
+## [34] codetools_0.2-14   htmltools_0.2.6    splines_3.2.2     
+## [37] assertthat_0.1     pbkrtest_0.4-2     colorspace_1.2-6  
+## [40] quantreg_5.19      stringi_0.5-5      lazyeval_0.1.10   
+## [43] munsell_0.4.2</code></pre>
 </div>
 </div>
 

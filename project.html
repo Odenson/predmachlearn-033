@@ -91,7 +91,6 @@ img {
 <li><a href="#accuracy-and-cohen-kappa">Accuracy and Cohen Kappa</a></li>
 <li><a href="#confusion-matrix">Confusion Matrix</a></li>
 </ul></li>
-<li><a href="#validation">Validation</a></li>
 <li><a href="#appendices">Appendices</a><ul>
 <li><a href="#references">References</a></li>
 <li><a href="#data">Data</a></li>
@@ -106,10 +105,10 @@ img {
 <h2>Summary</h2>
 <p>This report describes the algorithm used to predict how well people perform the exercise of lifting a dumbbell. This is a classification problem where predictors are used to determine one of five <a href="#goal">outcomes</a>. This report will:</p>
 <ul>
-<li><a href="#training-model">describe how the model was built</a></li>
-<li><a href="#choice-of-prediction-algorithm">what choices were made for this model</a></li>
-<li><a href="#testing">how the model was cross validated</a></li>
-<li><a href="#estimation-of-error-rate">what the expected out of sample error is</a></li>
+<li><a href="#choice-of-prediction-algorithm">describe the choices made in choosing a model</a></li>
+<li><a href="#data-partitioning">describe how the model was built</a></li>
+<li><a href="#testing">cross validate the model</a></li>
+<li><a href="#estimation-of-error-rate">estimate the out-of-sample error rate</a></li>
 </ul>
 <p>Links to data and further information of the original research can be found in the <a href="#references">appendices</a>.</p>
 <div id="background" class="section level3">
@@ -217,7 +216,11 @@ badNames &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class=
 goodNames &lt;-<span class="st"> </span><span class="kw">setdiff</span>(<span class="kw">names</span>(training), badNames)
 
 <span class="co"># exclude columns that do not aid in prediction (or are an outcome)</span>
-trainNames &lt;-<span class="st"> </span><span class="kw">grep</span>(<span class="kw">paste</span>(<span class="st">&quot;classe&quot;</span>, <span class="st">&quot;window&quot;</span>, <span class="st">&quot;user_name&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;_timestamp&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;|&quot;</span>), goodNames, <span class="dt">value =</span> <span class="ot">TRUE</span>, <span class="dt">invert =</span> <span class="ot">TRUE</span>)
+trainNames &lt;-
+<span class="st">    </span><span class="kw">grep</span>(
+      <span class="kw">paste</span>(<span class="st">&quot;classe&quot;</span>, <span class="st">&quot;window&quot;</span>, <span class="st">&quot;user_name&quot;</span>, <span class="st">&quot;X&quot;</span>, <span class="st">&quot;_timestamp&quot;</span>, <span class="dt">sep =</span> <span class="st">&quot;|&quot;</span>),
+      goodNames, <span class="dt">value =</span> <span class="ot">TRUE</span>, <span class="dt">invert =</span> <span class="ot">TRUE</span>
+    )
 
 <span class="co"># use these column names to generate training formula</span>
 trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<span class="kw">paste</span>(<span class="st">&quot;classe ~ &quot;</span>, <span class="kw">paste</span>(trainNames, <span class="dt">collapse =</span> <span class="st">&quot;+&quot;</span>))); trainFormula</code></pre>
@@ -241,6 +244,7 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 <h3>Training Model</h3>
 <p>The Random Forest was trained using the <a href="http://caret.r-forge.r-project.org/">caret</a> package with:</p>
 <pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">train</span>(trainFormula, <span class="dt">data =</span> training, <span class="dt">method =</span> <span class="st">&quot;rf&quot;</span>)</code></pre>
+<p><strong>Caution</strong>: This takes a long time to generate. For my system about 01:10 hours.</p>
 </div>
 <div id="check-multi-collinearity" class="section level3">
 <h3>Check Multi-Collinearity</h3>
@@ -280,7 +284,7 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 </div>
 <div id="testing" class="section level2">
 <h2>Testing</h2>
-<p>The model was cross-validated against the test data with:</p>
+<p>The model was next cross-validated against the reserved test data.</p>
 <pre class="sourceCode r"><code class="sourceCode r">testPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> testing)</code></pre>
 <div id="estimation-of-error-rate" class="section level3">
 <h3>Estimation of Error Rate</h3>
@@ -405,17 +409,6 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 </table>
 </div>
 </div>
-<div id="validation" class="section level2">
-<h2>Validation</h2>
-<p>The final model was run against validation data:</p>
-<pre class="sourceCode r"><code class="sourceCode r">validation &lt;-<span class="st"> </span><span class="kw">read.csv</span>(
-    <span class="st">&quot;data/pml-testing.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>,
-    <span class="dt">na.strings =</span> <span class="kw">c</span>(<span class="st">&quot;NA&quot;</span>, <span class="st">&quot;#DIV/0!&quot;</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>
-)
-validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> validation)
-<span class="kw">saveRDS</span>(validationPredict, <span class="st">&quot;data/predictions-rf.rds&quot;</span>)</code></pre>
-<p>These predictions were then processed using the <a href="#scripts">script</a> <code>pred.R</code> prior to submission for independent evaluation.</p>
-</div>
 <div id="appendices" class="section level2">
 <h2>Appendices</h2>
 <div id="references" class="section level3">
@@ -450,7 +443,7 @@ validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(
 </tr>
 <tr class="even">
 <td align="left">model-rf.R</td>
-<td align="left">train random forest model</td>
+<td align="left">full script to train and test random forest model</td>
 </tr>
 <tr class="odd">
 <td align="left">pred.R</td>

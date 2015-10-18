@@ -32,10 +32,10 @@ exercise of lifting a dumbbell. This is a classification problem where
 predictors are used to determine one of five [outcomes](#goal). This report
 will:
 
+* [describe the choices made in choosing a model](#choice-of-prediction-algorithm)
 * [describe how the model was built](#training-model)
-* [what choices were made for this model](#choice-of-prediction-algorithm)
-* [how the model was cross validated](#testing)
-* [what the expected out of sample error is](#estimation-of-error-rate)
+* [cross validate the model](#testing)
+* [estimate the out-of-sample error rate](#estimation-of-error-rate)
 
 Links to data and further information of the original research can be found in
 the [appendices](#references).
@@ -160,6 +160,9 @@ if (file.exists("data/model-rf.rds")) {
 }
 ```
 
+__Caution__: This takes a long time to generate. For my system about 01:10
+hours.
+
 ### Check Multi-Collinearity
 
 No collinear variables were identified. The model was tested with:
@@ -185,7 +188,7 @@ varImp(model)
 
 ## Testing
 
-The model was cross-validated against the test data with:
+The model was next cross-validated against the reserved test data.
 
 ```{r predict, echo = TRUE}
 testPredict <- predict(model, newdata = testing)
@@ -227,22 +230,6 @@ byClass <- round(cm$byClass, 3)
 kable(byClass, caption = "Confusion Matrix")
 ```
 
-## Validation
-
-The final model was run against validation data:
-
-```r
-validation <- read.csv(
-    "data/pml-testing.csv", header = TRUE,
-    na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
-)
-validationPredict <- predict(model, newdata = validation)
-saveRDS(validationPredict, "data/predictions-rf.rds")
-```
-
-These predictions were then processed using the [script](#scripts) ``pred.R``
-prior to submission for independent evaluation.
-
 ## Appendices
 
 ### References
@@ -266,7 +253,7 @@ The following scripts and this report are available from GitHub,
 | Name | Description |
 |------|-------------|
 | getdata.R | download raw CSV data from remote sources |
-| model-rf.R | train random forest model |
+| model-rf.R | full script to train and test random forest model |
 | pred.R | prepare predictions for submission |
 
 ### GitHub

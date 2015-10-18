@@ -169,12 +169,16 @@ cm$table
 # statistics by class
 round(cm$byClass, 4)
 
-# now lets look at project validation
+## Validation
+
+# The final model was run against validation data:
 validation <- read.csv(
     "data/pml-testing.csv", header = TRUE,
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
-predictions <- predict(model, newdata = validation)
+validationPredict <- predict(model, newdata = validation)
 # save answers
-saveRDS(predictions, "data/predictions-rf.rds")
-# see pred.R to process validation predictions
+saveRDS(validationPredict, "data/predictions-rf.rds")
+
+# These predictions were then processed using the [script](#scripts) ``pred.R``
+# prior to submission for independent evaluation.

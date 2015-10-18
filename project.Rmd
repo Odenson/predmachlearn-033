@@ -33,7 +33,7 @@ predictors are used to determine one of five [outcomes](#goal). This report
 will:
 
 * [describe the choices made in choosing a model](#choice-of-prediction-algorithm)
-* [describe how the model was built](#training-model)
+* [describe how the model was built](#data-partitioning)
 * [cross validate the model](#testing)
 * [estimate the out-of-sample error rate](#estimation-of-error-rate)
 
@@ -136,7 +136,11 @@ badNames <- sort(names(nas[nas >= 19216]))
 goodNames <- setdiff(names(training), badNames)
 
 # exclude columns that do not aid in prediction (or are an outcome)
-trainNames <- grep(paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"), goodNames, value = TRUE, invert = TRUE)
+trainNames <-
+    grep(
+      paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"),
+      goodNames, value = TRUE, invert = TRUE
+    )
 
 # use these column names to generate training formula
 trainFormula <- as.formula(paste("classe ~ ", paste(trainNames, collapse = "+"))); trainFormula

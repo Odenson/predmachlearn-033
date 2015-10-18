@@ -27,9 +27,10 @@ raw$classe <- factor(raw$classe)
 
 ## Summary
 
-This report describes the algorithm used to predict how people did an exercise
-of lifting a dumbbell. This is a classification problem where predictors are
-used to determine one of the five [outcomes](#goal). This report will:
+This report describes the algorithm used to predict how well people perform the
+exercise of lifting a dumbbell. This is a classification problem where
+predictors are used to determine one of five [outcomes](#goal). This report
+will:
 
 * [describe how the model was built](#training-model)
 * [what choices were made for this model](#choice-of-prediction-algorithm)
@@ -37,14 +38,14 @@ used to determine one of the five [outcomes](#goal). This report will:
 * [what the expected out of sample error is](#estimation-of-error-rate)
 
 Links to the data and further information of the research can be the
-[references](#references)
+[appendices](#references).
 
 ### Background
 
 Using devices such as [Jawbone Up](https://jawbone.com/up), [Nike
 FuelBand](http://www.nike.com/), and [Fitbit](https://www.fitbit.com) it is now
 possible to collect a large amount of data about personal activity relatively
-inexpensively. These type of devices are part of the quantified self movement –
+inexpensively. These type of devices are part of the quantified self movement,
 a group of enthusiasts who take measurements about themselves regularly to
 improve their health, to find patterns in their behavior, or because they are
 tech geeks. One thing that people regularly do is quantify how much of a
@@ -52,7 +53,7 @@ particular activity they do, but they rarely quantify how well they do it.
 
 ### Goal
 
-We wish to predict the the manner in which people did an exercise from data
+Here we wish to predict the manner in which people do an exercise from data
 collected from accelerometers on the belt, forearm, arm, and dumbbell of 6
 participants. They were asked to perform dumbbell lifts correctly and
 incorrectly in 5 different ways:
@@ -68,6 +69,9 @@ classeTable <- data.frame(Classe = classeId, Description = classeDesc)
 kable(classeTable, caption = "Classes of exercise activity")
 ```
 
+The prediction algorithm will determine which classification an exercise falls
+into.
+
 ## Exploratory Analysis
 
 The ``classe`` field is a categorical outcome, which we will treat as a factor.
@@ -75,14 +79,14 @@ The ``classe`` field is a categorical outcome, which we will treat as a factor.
 The data contains a large number (`r ncol(raw)`) of columns. However, many of
 these columns contain little or no information or contain an Excel ``#DIV/0!``
 conversion error. Consequently, we will exclude from the prediction formula
-all columns with a 95% or higher missing data.
+all columns with a 95% or higher of missing data.
 
 A number of columns will also be excluded since they do not provide value to
 prediction. They are:
 
 | Column | Reason |
 |--------|--------|
-| ``X`` | Row index |
+| ``X`` | Row index not related to a measurement |
 | ``*_window``, ``*_timestamp*`` | measurements were made in time segments with overlap so they can be treated as discrete and not time dependent |
 | ``user_name`` | who performed the action is not relevant as all were supervised to ensure consistent actions |
 
@@ -94,18 +98,18 @@ Table: Additional columns to ignore
 
 A good performing prediction algorithm for classification problems is [Random
 Forest](https://en.wikipedia.org/wiki/Random_forest). It is resilient to
-outliers but is affected by multi-collinearity, which will be tested for, later.
+outliers but is affected by multi-collinearity, which will [later be
+tested](#check-multi-collinearity) for.
 
 The predictors used in the formula, were tested using
-[rfUtilities](http://cran.r-project.org/package=rfUtilities). No multi-collinear
-variables were identified.
+[rfUtilities](http://cran.r-project.org/package=rfUtilities).
 
 ### Data Partitioning
 
-The [training data](#data) was partitioned into two partitions:
+The [training data](#data) was partitioned into two:
 
 * training (70%) - used to train model
-* testing (30%) - used for cross-validation, and error estimation
+* testing (30%) - used for [cross-validation](#testing), and estimate of [error rate](#estimation-of-error-rate)
 
 ```{r partition, echo = TRUE}
 # split into train (70%) and test (30%) on outcome (classe)
@@ -124,7 +128,7 @@ The model formula is composed of all fields, **except**
 
 Applying these conditions gives the formula:
 
-```{r formula}
+```{r formula, echo = TRUE}
 # ignore columns that are more than 95% empty (i.e. NA):
 nasPerc <- as.integer(0.95 * nrow(raw))
 nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
@@ -142,8 +146,8 @@ This will appear below in training as the variable ``trainFormula``.
 
 ### Training Model
 
-The Random Forest was trained using [caret](http://caret.r-forge.r-project.org/
-) package with:
+The Random Forest was trained using [caret](http://caret.r-forge.r-project.org/)
+package with:
 
 ```r
 model <- train(trainFormula, data = training, method = "rf")
@@ -160,13 +164,13 @@ if (file.exists("data/model-rf.rds")) {
 
 Multi-collinearity of the model was tested with:
 
-```{r, echo = TRUE}
+```{r collinear, echo = TRUE}
 multi.collinear(dplyr::select(training, one_of(trainNames)))
 ```
 
 ### Variable Importance
 
-Below is an abbreviated list of variable importance:
+Below is an abbreviated list of the models variable importance:
 
 ```{r importance}
 varImp(model)
@@ -191,7 +195,7 @@ testPredict <- predict(model, newdata = testing)
 
 Since this is categorical data, estimate using an accuracy measure:
 
-```{r errorEstimate, echo = TRUE}
+```{r estimateErrorRate, echo = TRUE}
 # estimate error (since this is categorical data we are estimating accuracy)
 errorRate <- function(trueValues, predictValues) {
     sum(trueValues != predictValues) / length(trueValues)
@@ -225,8 +229,7 @@ kable(byClass, caption = "Confusion Matrix")
 
 ## Validation
 
-The final model was run against the validation data yielding the following
-predictions:
+The final model was run against the validation data:
 
 ```r
 validation <- read.csv(
@@ -237,7 +240,8 @@ validationPredict <- predict(model, newdata = validation)
 saveRDS(validationPredict, "data/predictions-rf.rds")
 ```
 
-The predictions are then processed using the [script](#scripts) ``pred.R``
+These predictions are then processed using the [script](#scripts) ``pred.R``
+prior to submission for independent evaluation.
 
 ## Appendices
 
@@ -272,3 +276,4 @@ This report was produced using the following environment:
 ```{r session}
 sessionInfo()
 ```
+

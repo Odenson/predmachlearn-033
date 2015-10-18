@@ -4,7 +4,9 @@ author: "Frank Jung"
 date: "17 October 2015"
 output:
   html_document:
+    fig_caption: yes
     highlight: monochrome
+    keep_md: yes
     toc: yes
 ---
 
@@ -12,7 +14,7 @@ output:
 require(knitr, quietly = TRUE)
 require(caret, quietly = TRUE)
 require(dplyr, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
+require(scales, quietly = TRUE)
 require(rfUtilities, quietly = TRUE)
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
@@ -31,10 +33,10 @@ This report describes the algorithm used to predict how people did an exercise
 of lifting a dumbbell. This is a classification problem where predictors are
 used to determine one of the five [outcomes](#goal). This report will:
 
-* describe how the model was built
-* what choices were made for this model
-* how the model was cross validated
-* what the expected out of sample error is
+* [describe how the model was built](#training-model)
+* [what choices were made for this model](#choice-of-prediction-algorithm)
+* [how the model was cross validated](#testing)
+* [what the expected out of sample error is](#estimation-of-error-rate)
 
 Links to the data and further information of the research can be the
 [references](#references)
@@ -58,14 +60,14 @@ participants. They were asked to perform dumbbell lifts correctly and
 incorrectly in 5 different ways:
 
 ```{r classe-table}
-classe.id <- c(levels(raw$classe))
-classe.desc <- c("exactly according to the specification",
+classeId <- c(levels(raw$classe))
+classeDesc <- c("exactly according to the specification",
                  "throwing the elbows to the front",
                  "lifting the dumbbell only halfway",
                  "lowering the dumbbell only halfway",
                  "and throwing the hips to the front")
-classe.table <- data.frame(Classe = classe.id, Description = classe.desc)
-kable(classe.table, caption = "Classes of exercise activity")
+classeTable <- data.frame(Classe = classeId, Description = classeDesc)
+kable(classeTable, caption = "Classes of exercise activity")
 ```
 
 ## Exploratory Analysis
@@ -107,6 +109,7 @@ The [training data](#data) was partitioned into two partitions:
 
 ```{r partition, echo = TRUE}
 # split into train (70%) and test (30%) on outcome (classe)
+set.seed(033)
 rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
 training <- raw[rawindex,]
 testing <- raw[-rawindex,]
@@ -123,19 +126,19 @@ Applying these conditions leads to the formula with an outcome ``classe`` of:
 
 ```{r formula, fig.caption="Formula"}
 # ignore columns that are more than 95% empty (i.e. NA):
-nas.perc <- as.integer(0.95 * nrow(raw))
+nasPerc <- as.integer(0.95 * nrow(raw))
 nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
-bad.names <- sort(names(nas[nas >= 19216]))
-good.names <- setdiff(names(training), bad.names)
+badNames <- sort(names(nas[nas >= 19216]))
+goodNames <- setdiff(names(training), badNames)
 
 # exclude columns that do not aid in prediction (or are an outcome)
-train.names <- grep(paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"), good.names, value = TRUE, invert = TRUE)
+trainNames <- grep(paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"), goodNames, value = TRUE, invert = TRUE)
 
 # use these column names to generate training formula
-train.formula <- as.formula(paste("classe ~ ", paste(train.names, collapse = "+"))); train.formula
+trainFormula <- as.formula(paste("classe ~ ", paste(trainNames, collapse = "+"))); trainFormula
 ```
 
-This will appear below in training as the variable ``train.formula``.
+This will appear below in training as the variable ``trainFormula``.
 
 ### Training Model
 
@@ -143,7 +146,7 @@ The Random Forest was trained using [caret](http://caret.r-forge.r-project.org/
 ) package with:
 
 ```r
-model <- train(train.formula, data = training, method = "rf")
+model <- train(trainFormula, data = training, method = "rf")
 ```
 
 ```{r train}
@@ -157,8 +160,8 @@ if (file.exists("data/model-rf.rds")) {
 
 Multi-collinearity of the model was tested with:
 
-```{r, echo=TRUE}
-multi.collinear(dplyr::select(training, one_of(train.names)))
+```{r, echo = TRUE}
+multi.collinear(dplyr::select(training, one_of(trainNames)))
 ```
 
 ### Variable Importance
@@ -181,7 +184,7 @@ varImp(model)
 The model was cross-validated against the test data with:
 
 ```{r predict, echo = TRUE}
-test.predict <- predict(model, newdata = testing)
+testPredict <- predict(model, newdata = testing)
 ```
 
 ### Accuracy and Cohen Kappa
@@ -190,10 +193,10 @@ The accuracy and Cohen [Kappa](https://en.wikipedia.org/wiki/Cohen%27s_kappa)
 statistics are:
 
 ```{r accuracy}
-cm <- confusionMatrix(data = test.predict, reference = testing$classe)
+cm <- confusionMatrix(data = testPredict, reference = testing$classe)
 # ignore AccuracyNull(5) and McnemarPValue(7)
-overall.stats <- data.frame(Value = round(cm$overall[-c(5,7)], 3))
-kable(x = overall.stats, caption = "Overall Statistics")
+overallStats <- data.frame(Value = round(cm$overall[-c(5,7)], 3))
+kable(x = overallStats, caption = "Overall Statistics")
 ```
 
 ### Confusion Matrix
@@ -202,9 +205,23 @@ The predictions [confusion
 matrix](https://en.wikipedia.org/wiki/Confusion_matrix) is:
 
 ```{r confusionMatrix}
-byclass <- round(cm$byClass, 3)
-kable(byclass, caption = "Confusion Matrix")
+byClass <- round(cm$byClass, 3)
+kable(byClass, caption = "Confusion Matrix")
 ```
+
+### Estimation of Error Rate
+
+Since this is categorical data, estimate using an accuracy measure of:
+
+```{r estimate, echo = TRUE}
+# estimate error (since this is categorical data we are estimating accuracy)
+missClassified <- function(trueValues, predictValues) {
+    sum(predictValues != trueValues) / length(trueValues)
+}
+errorRate <- missClassified(testing$classe, testPredict)
+```
+
+For this model we have an estimate error rate of `r percent(errorRate)`.
 
 ## Validation
 
@@ -216,8 +233,8 @@ validation <- read.csv(
     "data/pml-testing.csv", header = TRUE,
     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
 )
-predictions <- predict(model, newdata = validation)
-saveRDS(predictions, "data/predictions-rf.rds")
+validationPredict <- predict(model, newdata = validation)
+saveRDS(validationPredict, "data/predictions-rf.rds")
 ```
 
 The predictions are then processed using the [script](scripts) ``pred.R``

@@ -54,6 +54,11 @@ rawindex <-
 training <- raw[rawindex,]
 testing <- raw[-rawindex,]
 
+# density plot - shows how exercise classe are represented
+png(filename = "data/plot-classe-density.png", width = 640, height = 480, units = "px")
+qplot(classe, data = training, geom = "density", colour = classe)
+dev.off()
+
 # do we have a good classe split?
 # table(training$classe)
 # table(testing$classe)
@@ -136,6 +141,12 @@ dev.off()
 
 # test
 test.predict <- predict(model, newdata = testing)
+# estimate error (since this is categorical data we are estimating accuracy)
+miss.classified <- function(trueValues, predictValues) {
+    sum(predictValues != trueValues) / length(trueValues)
+}
+error.rate <- miss.classified(testing$classe, test.predict)
+
 # print Accuracy and Kappa (measure of rating variable(s) agreement)
 postResample(test.predict, testing$classe)
 

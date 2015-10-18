@@ -111,7 +111,7 @@ img {
 <li><a href="#testing">how the model was cross validated</a></li>
 <li><a href="#estimation-of-error-rate">what the expected out of sample error is</a></li>
 </ul>
-<p>Links to the data and further information of the research can be the <a href="#references">appendices</a>.</p>
+<p>Links to data and further information of the original research can be found in the <a href="#references">appendices</a>.</p>
 <div id="background" class="section level3">
 <h3>Background</h3>
 <p>Using devices such as <a href="https://jawbone.com/up">Jawbone Up</a>, <a href="http://www.nike.com/">Nike FuelBand</a>, and <a href="https://www.fitbit.com">Fitbit</a> it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement, a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.</p>
@@ -239,12 +239,12 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 </div>
 <div id="training-model" class="section level3">
 <h3>Training Model</h3>
-<p>The Random Forest was trained using <a href="http://caret.r-forge.r-project.org/">caret</a> package with:</p>
+<p>The Random Forest was trained using the <a href="http://caret.r-forge.r-project.org/">caret</a> package with:</p>
 <pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">train</span>(trainFormula, <span class="dt">data =</span> training, <span class="dt">method =</span> <span class="st">&quot;rf&quot;</span>)</code></pre>
 </div>
 <div id="check-multi-collinearity" class="section level3">
 <h3>Check Multi-Collinearity</h3>
-<p>Multi-collinearity of the model was tested with:</p>
+<p>No collinear variables were identified. The model was tested with:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">multi.collinear</span>(dplyr::<span class="kw">select</span>(training, <span class="kw">one_of</span>(trainNames)))</code></pre>
 <pre><code>## [1] &quot; NO MULTICOLINEAR VARIABLES IDENTIFIED&quot;</code></pre>
 </div>
@@ -407,19 +407,20 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 </div>
 <div id="validation" class="section level2">
 <h2>Validation</h2>
-<p>The final model was run against the validation data:</p>
+<p>The final model was run against validation data:</p>
 <pre class="sourceCode r"><code class="sourceCode r">validation &lt;-<span class="st"> </span><span class="kw">read.csv</span>(
     <span class="st">&quot;data/pml-testing.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>,
     <span class="dt">na.strings =</span> <span class="kw">c</span>(<span class="st">&quot;NA&quot;</span>, <span class="st">&quot;#DIV/0!&quot;</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>
 )
 validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> validation)
 <span class="kw">saveRDS</span>(validationPredict, <span class="st">&quot;data/predictions-rf.rds&quot;</span>)</code></pre>
-<p>These predictions are then processed using the <a href="#scripts">script</a> <code>pred.R</code> prior to submission for independent evaluation.</p>
+<p>These predictions were then processed using the <a href="#scripts">script</a> <code>pred.R</code> prior to submission for independent evaluation.</p>
 </div>
 <div id="appendices" class="section level2">
 <h2>Appendices</h2>
 <div id="references" class="section level3">
 <h3>References</h3>
+<p>Source research paper:</p>
 <ul>
 <li>Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. <a href="http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201">Qualitative Activity Recognition of Weight Lifting Exercises</a>. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13) . Stuttgart, Germany: ACM SIGCHI, 2013. <a href="http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf">PDF</a></li>
 </ul>
@@ -434,6 +435,7 @@ validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(
 </div>
 <div id="scripts" class="section level3">
 <h3>Scripts</h3>
+<p>The following scripts and this report are available from GitHub, <a href="https://github.com/frankhjung/predmachlearn-033">here</a>.</p>
 <table>
 <thead>
 <tr class="header">
@@ -460,13 +462,13 @@ validationPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(
 <div id="github" class="section level3">
 <h3>GitHub</h3>
 <ul>
-<li><a href="https://github.com/frankhjung/predmachlearn-033">Source</a></li>
-<li><a href="https://frankhjung.github.io/predmachlearn-033/project.html">HTML Report</a></li>
+<li>Source <a href="https://github.com/frankhjung/predmachlearn-033" class="uri">https://github.com/frankhjung/predmachlearn-033</a></li>
+<li>This HTML Report <a href="https://frankhjung.github.io/predmachlearn-033/project.html" class="uri">https://frankhjung.github.io/predmachlearn-033/project.html</a></li>
 </ul>
 </div>
 <div id="session-information" class="section level3">
 <h3>Session Information</h3>
-<p>This report was produced using the following environment:</p>
+<p>This report was produced using the following RStudio environment:</p>
 <pre><code>## R version 3.2.2 (2015-08-14)
 ## Platform: x86_64-pc-linux-gnu (64-bit)
 ## Running under: Linux Mint LMDE

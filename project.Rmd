@@ -13,7 +13,6 @@ output:
 require(knitr, quietly = TRUE)
 require(caret, quietly = TRUE)
 require(dplyr, quietly = TRUE)
-require(scales, quietly = TRUE)
 require(rfUtilities, quietly = TRUE)
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 ```
@@ -40,7 +39,7 @@ used to determine one of the five [outcomes](#goal). This report will:
 Links to the data and further information of the research can be the
 [references](#references)
 
-## Background
+### Background
 
 Using devices such as [Jawbone Up](https://jawbone.com/up), [Nike
 FuelBand](http://www.nike.com/), and [Fitbit](https://www.fitbit.com) it is now
@@ -51,7 +50,7 @@ improve their health, to find patterns in their behavior, or because they are
 tech geeks. One thing that people regularly do is quantify how much of a
 particular activity they do, but they rarely quantify how well they do it.
 
-## Goal
+### Goal
 
 We wish to predict the the manner in which people did an exercise from data
 collected from accelerometers on the belt, forearm, arm, and dumbbell of 6
@@ -89,7 +88,9 @@ prediction. They are:
 
 Table: Additional columns to ignore
 
-## Choice of Prediction Algorithm
+## Training
+
+### Choice of Prediction Algorithm
 
 A good performing prediction algorithm for classification problems is [Random
 Forest](https://en.wikipedia.org/wiki/Random_forest). It is resilient to
@@ -198,7 +199,7 @@ missClassified <- function(trueValues, predictValues) {
 errorRate <- missClassified(testing$classe, testPredict)
 ```
 
-For this model we have an estimated error rate of **`r percent(errorRate)`**.
+The estimated error rate for this model is **`r round(100 * errorRate, 3)` %**.
 
 ### Accuracy and Cohen Kappa
 

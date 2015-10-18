@@ -37,8 +37,8 @@ will:
 * [how the model was cross validated](#testing)
 * [what the expected out of sample error is](#estimation-of-error-rate)
 
-Links to the data and further information of the research can be the
-[appendices](#references).
+Links to data and further information of the original research can be found in
+the [appendices](#references).
 
 ### Background
 
@@ -146,8 +146,8 @@ This will appear below in training as the variable ``trainFormula``.
 
 ### Training Model
 
-The Random Forest was trained using [caret](http://caret.r-forge.r-project.org/)
-package with:
+The Random Forest was trained using the
+[caret](http://caret.r-forge.r-project.org/) package with:
 
 ```r
 model <- train(trainFormula, data = training, method = "rf")
@@ -162,7 +162,7 @@ if (file.exists("data/model-rf.rds")) {
 
 ### Check Multi-Collinearity
 
-Multi-collinearity of the model was tested with:
+No collinear variables were identified. The model was tested with:
 
 ```{r collinear, echo = TRUE}
 multi.collinear(dplyr::select(training, one_of(trainNames)))
@@ -229,7 +229,7 @@ kable(byClass, caption = "Confusion Matrix")
 
 ## Validation
 
-The final model was run against the validation data:
+The final model was run against validation data:
 
 ```r
 validation <- read.csv(
@@ -240,12 +240,14 @@ validationPredict <- predict(model, newdata = validation)
 saveRDS(validationPredict, "data/predictions-rf.rds")
 ```
 
-These predictions are then processed using the [script](#scripts) ``pred.R``
+These predictions were then processed using the [script](#scripts) ``pred.R``
 prior to submission for independent evaluation.
 
 ## Appendices
 
 ### References
+
+Source research paper:
 
 * Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
 
@@ -258,6 +260,9 @@ Data for this project was sourced from:
 
 ### Scripts
 
+The following scripts and this report are available from GitHub,
+[here](https://github.com/frankhjung/predmachlearn-033).
+
 | Name | Description |
 |------|-------------|
 | getdata.R | download raw CSV data from remote sources |
@@ -266,12 +271,12 @@ Data for this project was sourced from:
 
 ### GitHub
 
-* [Source](https://github.com/frankhjung/predmachlearn-033)
-* [HTML Report](https://frankhjung.github.io/predmachlearn-033/project.html)
+* Source https://github.com/frankhjung/predmachlearn-033
+* This HTML Report https://frankhjung.github.io/predmachlearn-033/project.html
 
 ### Session Information
 
-This report was produced using the following environment:
+This report was produced using the following RStudio environment:
 
 ```{r session}
 sessionInfo()

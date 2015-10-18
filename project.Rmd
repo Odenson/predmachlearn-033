@@ -1,12 +1,11 @@
 ---
 title: "Predict Correct Use of Dumbbells"
 author: "Frank Jung"
-date: "17 October 2015"
+date: "18 October 2015"
 output:
   html_document:
     fig_caption: yes
     highlight: monochrome
-    keep_md: yes
     toc: yes
 ---
 
@@ -122,9 +121,9 @@ The model formula is composed of all fields, **except**
 * columns that are more than 95% empty (i.e. NA)
 * non-predictive columns identified in [Table: Additional columns to ignore](#exploratory-analysis)
 
-Applying these conditions leads to the formula with an outcome ``classe`` of:
+Applying these conditions gives the formula:
 
-```{r formula, fig.caption="Formula"}
+```{r formula}
 # ignore columns that are more than 95% empty (i.e. NA):
 nasPerc <- as.integer(0.95 * nrow(raw))
 nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
@@ -187,6 +186,20 @@ The model was cross-validated against the test data with:
 testPredict <- predict(model, newdata = testing)
 ```
 
+### Estimation of Error Rate
+
+Since this is categorical data, estimate using an accuracy measure:
+
+```{r errorEstimate, echo = TRUE}
+# estimate error (since this is categorical data we are estimating accuracy)
+missClassified <- function(trueValues, predictValues) {
+    sum(trueValues != predictValues) / length(trueValues)
+}
+errorRate <- missClassified(testing$classe, testPredict)
+```
+
+For this model we have an estimated error rate of **`r percent(errorRate)`**.
+
 ### Accuracy and Cohen Kappa
 
 The accuracy and Cohen [Kappa](https://en.wikipedia.org/wiki/Cohen%27s_kappa)
@@ -208,20 +221,6 @@ matrix](https://en.wikipedia.org/wiki/Confusion_matrix) is:
 byClass <- round(cm$byClass, 3)
 kable(byClass, caption = "Confusion Matrix")
 ```
-
-### Estimation of Error Rate
-
-Since this is categorical data, estimate using an accuracy measure of:
-
-```{r estimate, echo = TRUE}
-# estimate error (since this is categorical data we are estimating accuracy)
-missClassified <- function(trueValues, predictValues) {
-    sum(predictValues != trueValues) / length(trueValues)
-}
-errorRate <- missClassified(testing$classe, testPredict)
-```
-
-For this model we have an estimate error rate of `r percent(errorRate)`.
 
 ## Validation
 
@@ -264,3 +263,11 @@ Data for this project was sourced from:
 
 * [Source](https://github.com/frankhjung/predmachlearn-033)
 * [HTML Report](https://frankhjung.github.io/predmachlearn-033/project.html)
+
+### Session Information
+
+This report was produced using the following environment:
+
+```{r session}
+sessionInfo()
+```

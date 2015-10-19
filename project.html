@@ -94,8 +94,7 @@ img {
 <li><a href="#appendices">Appendices</a><ul>
 <li><a href="#references">References</a></li>
 <li><a href="#data">Data</a></li>
-<li><a href="#scripts">Scripts</a></li>
-<li><a href="#github">GitHub</a></li>
+<li><a href="#source">Source</a></li>
 <li><a href="#session-information">Session Information</a></li>
 </ul></li>
 </ul>
@@ -185,7 +184,7 @@ img {
 <h2>Training</h2>
 <div id="choice-of-prediction-algorithm" class="section level3">
 <h3>Choice of Prediction Algorithm</h3>
-<p>A good performing prediction algorithm for classification problems is <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a>. It is resilient to outliers but is affected by multi-collinearity, which will <a href="#check-multi-collinearity">later be tested</a> for.</p>
+<p>A good performing prediction algorithm for classification problems is <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a>. It is resilient to outliers but is affected by multi-collinearity. This will <a href="#check-multi-collinearity">be tested</a> later.</p>
 <p>The predictors used in the formula, were tested using <a href="http://cran.r-project.org/package=rfUtilities">rfUtilities</a>.</p>
 </div>
 <div id="data-partitioning" class="section level3">
@@ -193,7 +192,7 @@ img {
 <p>The <a href="#data">training data</a> was partitioned into two:</p>
 <ul>
 <li>training (70%) - used to train model</li>
-<li>testing (30%) - used for <a href="#testing">cross-validation</a>, and estimate of <a href="#estimation-of-error-rate">error rate</a></li>
+<li>testing (30%) - used for <a href="#testing">cross-validation</a>, and estimate the <a href="#estimation-of-error-rate">error rate</a></li>
 </ul>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># split into train (70%) and test (30%) on outcome (classe)</span>
 <span class="kw">set.seed</span>(<span class="dv">033</span>)
@@ -203,12 +202,12 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 </div>
 <div id="training-formula" class="section level3">
 <h3>Training Formula</h3>
-<p>The model formula is composed of all fields, <strong>except</strong></p>
+<p>The model prediction formula is composed of all fields, <strong>except</strong>:</p>
 <ul>
-<li>columns that are more than 95% empty (i.e. NA)</li>
+<li>columns that are more than 95% empty</li>
 <li>non-predictive columns identified in <a href="#exploratory-analysis">Table: Additional columns to ignore</a></li>
 </ul>
-<p>Applying these conditions gives the formula:</p>
+<p>Applying these conditions gives the prediction formula:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># ignore columns that are more than 95% empty (i.e. NA):</span>
 nasPerc &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="fl">0.95</span> *<span class="st"> </span><span class="kw">nrow</span>(raw))
 nas &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">apply</span>(raw, <span class="dv">2</span>, function(x) <span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(x)))), <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
@@ -244,7 +243,7 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 <h3>Training Model</h3>
 <p>The Random Forest was trained using the <a href="http://caret.r-forge.r-project.org/">caret</a> package with:</p>
 <pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">train</span>(trainFormula, <span class="dt">data =</span> training, <span class="dt">method =</span> <span class="st">&quot;rf&quot;</span>)</code></pre>
-<p><strong>Caution</strong>: This takes a long time to generate. For my system about 01:10 hours.</p>
+<p><strong>Caution</strong>: This takes a long time to generate. For my system about 01:05 hours.</p>
 </div>
 <div id="check-multi-collinearity" class="section level3">
 <h3>Check Multi-Collinearity</h3>
@@ -284,7 +283,7 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 </div>
 <div id="testing" class="section level2">
 <h2>Testing</h2>
-<p>The model was next cross-validated against the reserved test data.</p>
+<p>The model was next cross-validated against the reserved test data:</p>
 <pre class="sourceCode r"><code class="sourceCode r">testPredict &lt;-<span class="st"> </span><span class="kw">predict</span>(model, <span class="dt">newdata =</span> testing)</code></pre>
 <div id="estimation-of-error-rate" class="section level3">
 <h3>Estimation of Error Rate</h3>
@@ -333,7 +332,7 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 </div>
 <div id="confusion-matrix" class="section level3">
 <h3>Confusion Matrix</h3>
-<p>The predictions <a href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> is:</p>
+<p>The prediction <a href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> is:</p>
 <table>
 <caption>Confusion Matrix</caption>
 <thead>
@@ -426,9 +425,9 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 <li>Validation data, <a href="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv" class="uri">https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv</a></li>
 </ul>
 </div>
-<div id="scripts" class="section level3">
-<h3>Scripts</h3>
-<p>The following scripts and this report are available from GitHub, <a href="https://github.com/frankhjung/predmachlearn-033">here</a>.</p>
+<div id="source" class="section level3">
+<h3>Source</h3>
+<p>The source code and model data for this report are available from GitHub, <a href="https://github.com/frankhjung/predmachlearn-033" class="uri">https://github.com/frankhjung/predmachlearn-033</a>.</p>
 <table>
 <thead>
 <tr class="header">
@@ -451,13 +450,6 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 </tr>
 </tbody>
 </table>
-</div>
-<div id="github" class="section level3">
-<h3>GitHub</h3>
-<ul>
-<li>Source <a href="https://github.com/frankhjung/predmachlearn-033" class="uri">https://github.com/frankhjung/predmachlearn-033</a></li>
-<li>This HTML Report <a href="https://frankhjung.github.io/predmachlearn-033/project.html" class="uri">https://frankhjung.github.io/predmachlearn-033/project.html</a></li>
-</ul>
 </div>
 <div id="session-information" class="section level3">
 <h3>Session Information</h3>

@@ -21,3 +21,8 @@ if (file.exists("data/model-rf.rds")) {
     print("Restoring model ...")
     model <- readRDS("data/model-rf.rds")
 }
+
+if (file.exists("data/model-lda.rds")) {
+    print("Restoring model ...")
+    model <- readRDS("data/model-lda.rds")
+}

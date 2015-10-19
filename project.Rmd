@@ -98,8 +98,8 @@ Table: Additional columns to ignore
 
 A good performing prediction algorithm for classification problems is [Random
 Forest](https://en.wikipedia.org/wiki/Random_forest). It is resilient to
-outliers but is affected by multi-collinearity, which will [later be
-tested](#check-multi-collinearity) for.
+outliers but is affected by multi-collinearity. This will [be
+tested](#check-multi-collinearity) later.
 
 The predictors used in the formula, were tested using
 [rfUtilities](http://cran.r-project.org/package=rfUtilities).
@@ -109,7 +109,7 @@ The predictors used in the formula, were tested using
 The [training data](#data) was partitioned into two:
 
 * training (70%) - used to train model
-* testing (30%) - used for [cross-validation](#testing), and estimate of [error rate](#estimation-of-error-rate)
+* testing (30%) - used for [cross-validation](#testing), and estimate the [error rate](#estimation-of-error-rate)
 
 ```{r partition, echo = TRUE}
 # split into train (70%) and test (30%) on outcome (classe)
@@ -121,12 +121,12 @@ testing <- raw[-rawindex,]
 
 ### Training Formula
 
-The model formula is composed of all fields, **except**
+The model prediction formula is composed of all fields, **except**:
 
-* columns that are more than 95% empty (i.e. NA)
+* columns that are more than 95% empty
 * non-predictive columns identified in [Table: Additional columns to ignore](#exploratory-analysis)
 
-Applying these conditions gives the formula:
+Applying these conditions gives the prediction formula:
 
 ```{r formula, echo = TRUE}
 # ignore columns that are more than 95% empty (i.e. NA):
@@ -164,7 +164,7 @@ if (file.exists("data/model-rf.rds")) {
 }
 ```
 
-__Caution__: This takes a long time to generate. For my system about 01:10
+__Caution__: This takes a long time to generate. For my system about 01:05
 hours.
 
 ### Check Multi-Collinearity
@@ -192,7 +192,7 @@ varImp(model)
 
 ## Testing
 
-The model was next cross-validated against the reserved test data.
+The model was next cross-validated against the reserved test data:
 
 ```{r predict, echo = TRUE}
 testPredict <- predict(model, newdata = testing)
@@ -226,7 +226,7 @@ kable(x = overallStats, caption = "Overall Statistics")
 
 ### Confusion Matrix
 
-The predictions [confusion
+The prediction [confusion
 matrix](https://en.wikipedia.org/wiki/Confusion_matrix) is:
 
 ```{r confusionMatrix}
@@ -249,21 +249,16 @@ Data for this project was sourced from:
 * Training data, https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
 * Validation data, https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
 
-### Scripts
+### Source
 
-The following scripts and this report are available from GitHub,
-[here](https://github.com/frankhjung/predmachlearn-033).
+The source code and model data for this report are available from GitHub,
+https://github.com/frankhjung/predmachlearn-033.
 
 | Name | Description |
 |------|-------------|
 | getdata.R | download raw CSV data from remote sources |
 | model-rf.R | full script to train and test random forest model |
 | pred.R | prepare predictions for submission |
-
-### GitHub
-
-* Source https://github.com/frankhjung/predmachlearn-033
-* This HTML Report https://frankhjung.github.io/predmachlearn-033/project.html
 
 ### Session Information
 
@@ -272,4 +267,3 @@ This report was produced using the following RStudio environment:
 ```{r session}
 sessionInfo()
 ```
-

@@ -10,7 +10,7 @@
 
 <meta name="author" content="Frank Jung" />
 
-<meta name="date" content="2015-10-18" />
+<meta name="date" content="2015-10-19" />
 
 <title>Predict Correct Use of Dumbbells</title>
 
@@ -68,12 +68,12 @@ img {
 <div id="header">
 <h1 class="title">Predict Correct Use of Dumbbells</h1>
 <h4 class="author"><em>Frank Jung</em></h4>
-<h4 class="date"><em>18 October 2015</em></h4>
+<h4 class="date"><em>19 October 2015</em></h4>
 </div>
 
 <div id="TOC">
 <ul>
-<li><a href="#summary">Summary</a><ul>
+<li><a href="#overview">Overview</a><ul>
 <li><a href="#background">Background</a></li>
 <li><a href="#goal">Goal</a></li>
 </ul></li>
@@ -101,8 +101,8 @@ img {
 </ul>
 </div>
 
-<div id="summary" class="section level2">
-<h2>Summary</h2>
+<div id="overview" class="section level2">
+<h2>Overview</h2>
 <p>This report describes the algorithm used to predict how well people perform the exercise of lifting a dumbbell. This is a classification problem where predictors are used to determine one of five <a href="#goal">outcomes</a>. This report will:</p>
 <ul>
 <li><a href="#choice-of-prediction-algorithm">describe the choices made in choosing a model</a></li>
@@ -212,7 +212,7 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># ignore columns that are more than 95% empty (i.e. NA):</span>
 nasPerc &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="fl">0.95</span> *<span class="st"> </span><span class="kw">nrow</span>(raw))
 nas &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">apply</span>(raw, <span class="dv">2</span>, function(x) <span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(x)))), <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
-badNames &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">names</span>(nas[nas &gt;=<span class="st"> </span><span class="dv">19216</span>]))
+badNames &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">names</span>(nas[nas &gt;=<span class="st"> </span>nasPerc]))
 goodNames &lt;-<span class="st"> </span><span class="kw">setdiff</span>(<span class="kw">names</span>(training), badNames)
 
 <span class="co"># exclude columns that do not aid in prediction (or are an outcome)</span>

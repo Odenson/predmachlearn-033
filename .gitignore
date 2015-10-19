@@ -3,3 +3,6 @@
 .RData
 docs/
 *.png
+data/model-rf-?.rds
+data/predictions*.rds
+data/run-rf-?.log

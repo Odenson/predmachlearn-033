@@ -1,7 +1,7 @@
 ---
 title: "Predict Correct Use of Dumbbells"
 author: "Frank Jung"
-date: "18 October 2015"
+date: "19 October 2015"
 output:
   html_document:
     fig_caption: yes

@@ -25,7 +25,7 @@ raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#D
 raw$classe <- factor(raw$classe)
 ```
 
-## Summary
+## Overview
 
 This report describes the algorithm used to predict how well people perform the
 exercise of lifting a dumbbell. This is a classification problem where
@@ -132,7 +132,7 @@ Applying these conditions gives the formula:
 # ignore columns that are more than 95% empty (i.e. NA):
 nasPerc <- as.integer(0.95 * nrow(raw))
 nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
-badNames <- sort(names(nas[nas >= 19216]))
+badNames <- sort(names(nas[nas >= nasPerc]))
 goodNames <- setdiff(names(training), badNames)
 
 # exclude columns that do not aid in prediction (or are an outcome)

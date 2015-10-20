@@ -15,7 +15,7 @@ https://frankhjung.github.io/predmachlearn-033/project.html
 |------|-------------|
 | getdata.R | download raw CSV data from remote sources |
 | model-rf.R | train random forest model |
-| model-lda.R | train LDA model **not used** |
+| model-lda.R | train LDA model (not used) |
 | pred.R | prepare predictions for submission |
 | project.Rmd | project source |
 
@@ -25,10 +25,10 @@ In ``data`` directory:
 
 | Name | Description |
 |------|-------------|
-| model-lda.rds | save of LDA model **not used** |
+| model-lda.rds | save of LDA model (not used) |
 | model-rf.rds | save of Random forest model |
 | pml-testing.csv | validation data |
 | pml-training.csv | training data |
-| run-lda.log | run log of LDA model |
+| run-lda.log | run log of LDA model (not used) |
 | run-rf.log | run log of Random Forest model |
 

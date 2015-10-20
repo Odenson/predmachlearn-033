@@ -2,24 +2,26 @@
 
 # run model against "validation" to generate "predictions" for submission
 
-restore <- function() {
-    # restore random forest model
+# restore random forest model
+restoreModel <- function() {
     if (!exists("model") & file.exists("data/model-rf.rds")) {
         print("Restoring model ...")
-        model <- readRDS("data/model-rf.rds")
+        readRDS("data/model-rf.rds")
     }
+}
 
+# restore validation data
+restoreData <- function() {
     if (!exists("validation")) {
-        validation <- read.csv(
+        print("Restoring validation data ...")
+        read.csv(
             "data/pml-testing.csv", header = TRUE,
             na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
         )
     }
 }
 
-#
-# Function to write validation results to separate files
-#
+# write validation results to separate files
 pml_write_files = function(x) {
     n = length(x)
     for (i in 1:n) {
@@ -35,7 +37,8 @@ pml_write_files = function(x) {
 #
 
 # load model and validation data
-restore()
+model <- restoreModel()
+validation <- restoreData()
 
 # make predictions on validation data
 predictions <- predict(model, newdata = validation)

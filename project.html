@@ -88,9 +88,6 @@ img {
 </ul></li>
 <li><a href="#testing">Testing</a><ul>
 <li><a href="#estimation-of-error-rate">Estimation of Error Rate</a></li>
-<li><a href="#accuracy-and-cohen-kappa">Accuracy and Cohen Kappa</a></li>
-<li><a href="#confusion-matrix">Confusion Matrix</a></li>
-<li><a href="#statistics-by-class">Statistics by Class</a></li>
 </ul></li>
 <li><a href="#appendices">Appendices</a><ul>
 <li><a href="#references">References</a></li>
@@ -550,183 +547,6 @@ errorRate &lt;-<span class="st"> </span>function(trueValues, predictValues) {
 estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testing$classe, testPredict)</code></pre>
 <p>The estimated error rate for this model is <strong>0.374%</strong>.</p>
 </div>
-<div id="accuracy-and-cohen-kappa" class="section level3">
-<h3>Accuracy and Cohen Kappa</h3>
-<p>The accuracy and Cohen <a href="https://en.wikipedia.org/wiki/Cohen%27s_kappa">Kappa</a> statistics are:</p>
-<table>
-<caption>Overall Statistics</caption>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">Value</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Accuracy</td>
-<td align="right">0.996</td>
-</tr>
-<tr class="even">
-<td align="left">Kappa</td>
-<td align="right">0.995</td>
-</tr>
-<tr class="odd">
-<td align="left">AccuracyLower</td>
-<td align="right">0.994</td>
-</tr>
-<tr class="even">
-<td align="left">AccuracyUpper</td>
-<td align="right">0.998</td>
-</tr>
-<tr class="odd">
-<td align="left">AccuracyPValue</td>
-<td align="right">0.000</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="confusion-matrix" class="section level3">
-<h3>Confusion Matrix</h3>
-<p>The prediction <a href="https://en.wikipedia.org/wiki/Confusion_matrix">confusion matrix</a> is:</p>
-<table>
-<caption>Confusion Matrix</caption>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">A</th>
-<th align="right">B</th>
-<th align="right">C</th>
-<th align="right">D</th>
-<th align="right">E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">A</td>
-<td align="right">1696</td>
-<td align="right">4</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">B</td>
-<td align="right">0</td>
-<td align="right">1131</td>
-<td align="right">5</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">C</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1040</td>
-<td align="right">9</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">D</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">920</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">E</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">3</td>
-<td align="right">1078</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div id="statistics-by-class" class="section level3">
-<h3>Statistics by Class</h3>
-<p>Statistics by class:</p>
-<table>
-<caption>Statistics by Class</caption>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">Class: A</th>
-<th align="right">Class: B</th>
-<th align="right">Class: C</th>
-<th align="right">Class: D</th>
-<th align="right">Class: E</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Sensitivity</td>
-<td align="right">1.000</td>
-<td align="right">0.996</td>
-<td align="right">0.995</td>
-<td align="right">0.987</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="even">
-<td align="left">Specificity</td>
-<td align="right">0.999</td>
-<td align="right">0.999</td>
-<td align="right">0.998</td>
-<td align="right">1.000</td>
-<td align="right">0.999</td>
-</tr>
-<tr class="odd">
-<td align="left">Pos Pred Value</td>
-<td align="right">0.998</td>
-<td align="right">0.996</td>
-<td align="right">0.990</td>
-<td align="right">1.000</td>
-<td align="right">0.997</td>
-</tr>
-<tr class="even">
-<td align="left">Neg Pred Value</td>
-<td align="right">1.000</td>
-<td align="right">0.999</td>
-<td align="right">0.999</td>
-<td align="right">0.998</td>
-<td align="right">1.000</td>
-</tr>
-<tr class="odd">
-<td align="left">Prevalence</td>
-<td align="right">0.288</td>
-<td align="right">0.193</td>
-<td align="right">0.178</td>
-<td align="right">0.158</td>
-<td align="right">0.183</td>
-</tr>
-<tr class="even">
-<td align="left">Detection Rate</td>
-<td align="right">0.288</td>
-<td align="right">0.192</td>
-<td align="right">0.177</td>
-<td align="right">0.156</td>
-<td align="right">0.183</td>
-</tr>
-<tr class="odd">
-<td align="left">Detection Prevalence</td>
-<td align="right">0.289</td>
-<td align="right">0.193</td>
-<td align="right">0.178</td>
-<td align="right">0.156</td>
-<td align="right">0.184</td>
-</tr>
-<tr class="even">
-<td align="left">Balanced Accuracy</td>
-<td align="right">1.000</td>
-<td align="right">0.997</td>
-<td align="right">0.997</td>
-<td align="right">0.994</td>
-<td align="right">1.000</td>
-</tr>
-</tbody>
-</table>
-</div>
 </div>
 <div id="appendices" class="section level2">
 <h2>Appendices</h2>
@@ -791,26 +611,17 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 ## [1] stats     graphics  grDevices utils     datasets  methods   base     
 ## 
 ## other attached packages:
-## [1] caret_6.0-57        lattice_0.20-33     rfUtilities_1.0-2  
-## [4] ggplot2_1.0.1       dplyr_0.4.3         randomForest_4.6-12
-## [7] knitr_1.11          MASS_7.3-44        
+## [1] rfUtilities_1.0-2   ggplot2_1.0.1       dplyr_0.4.3        
+## [4] randomForest_4.6-12 knitr_1.11          MASS_7.3-44        
 ## 
 ## loaded via a namespace (and not attached):
-##  [1] Rcpp_0.12.1        nloptr_1.0.4       formatR_1.2.1     
-##  [4] plyr_1.8.3         highr_0.5.1        class_7.3-14      
-##  [7] iterators_1.0.8    tools_3.2.2        digest_0.6.8      
-## [10] lme4_1.1-10        evaluate_0.8       gtable_0.1.2      
-## [13] nlme_3.1-122       mgcv_1.8-7         Matrix_1.2-2      
-## [16] foreach_1.4.3      DBI_0.3.1          yaml_2.1.13       
-## [19] parallel_3.2.2     SparseM_1.7        proto_0.3-10      
-## [22] e1071_1.6-7        stringr_1.0.0      MatrixModels_0.4-1
-## [25] stats4_3.2.2       grid_3.2.2         nnet_7.3-11       
-## [28] R6_2.1.1           rmarkdown_0.8.1    minqa_1.2.4       
-## [31] reshape2_1.4.1     car_2.1-0          magrittr_1.5      
-## [34] scales_0.3.0       codetools_0.2-14   htmltools_0.2.6   
-## [37] splines_3.2.2      assertthat_0.1     pbkrtest_0.4-2    
-## [40] colorspace_1.2-6   quantreg_5.19      stringi_0.5-5     
-## [43] lazyeval_0.1.10    munsell_0.4.2</code></pre>
+##  [1] Rcpp_0.12.1      magrittr_1.5     munsell_0.4.2    colorspace_1.2-6
+##  [5] R6_2.1.1         highr_0.5.1      stringr_1.0.0    plyr_1.8.3      
+##  [9] tools_3.2.2      parallel_3.2.2   grid_3.2.2       gtable_0.1.2    
+## [13] DBI_0.3.1        htmltools_0.2.6  lazyeval_0.1.10  yaml_2.1.13     
+## [17] assertthat_0.1   digest_0.6.8     reshape2_1.4.1   formatR_1.2.1   
+## [21] evaluate_0.8     rmarkdown_0.8.1  stringi_0.5-5    scales_0.3.0    
+## [25] proto_0.3-10</code></pre>
 </div>
 </div>
 

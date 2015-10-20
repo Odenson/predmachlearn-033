@@ -231,37 +231,6 @@ estimated <- errorRate(testing$classe, testPredict)
 
 The estimated error rate for this model is **`r round(100 * estimated, 3)`%**.
 
-### Accuracy and Cohen Kappa
-
-The accuracy and Cohen [Kappa](https://en.wikipedia.org/wiki/Cohen%27s_kappa)
-statistics are:
-
-```{r accuracy}
-require(caret, quietly = TRUE)
-cm <- confusionMatrix(data = testPredict, reference = testing$classe)
-# ignore AccuracyNull(5) and McnemarPValue(7)
-overallStats <- data.frame(Value = round(cm$overall[-c(5,7)], 3))
-kable(x = overallStats, caption = "Overall Statistics")
-```
-
-### Confusion Matrix
-
-The prediction [confusion
-matrix](https://en.wikipedia.org/wiki/Confusion_matrix) is:
-
-```{r confusionMatrix}
-kable(x = cm$table, caption = "Confusion Matrix")
-```
-
-### Statistics by Class
-
-Statistics by class:
-
-```{r statistics}
-byClass <- round(cm$byClass, 3)
-kable(t(byClass), caption = "Statistics by Class")
-```
-
 ## Appendices
 
 ### References

@@ -99,8 +99,8 @@ Table: Additional columns to ignore
 
 A good performing prediction algorithm for classification problems is [Random
 Forest](https://en.wikipedia.org/wiki/Random_forest). It is resilient to
-outliers but is affected by multi-collinearity. This will [be
-tested](#check-multi-collinearity) later.
+outliers but is affected by multi-collinearity. This will be
+tested [later](#check-multi-collinearity).
 
 The predictors used in the formula, were tested using
 [rfUtilities](http://cran.r-project.org/package=rfUtilities).

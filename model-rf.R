@@ -7,25 +7,22 @@
 
 # A much better way to do this (CPU wise) is directly using the Random Forest package.
 # See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
-#
-# Built a similar model < 10 minutes. :-( I wish I new this earlier!
+
+# Built a similar model ~ 1 minute
 # Estimated error was also less:
 # Caret (1+ hours to run): 0.009345794
 # RandomForest (< 10 minutes): 0.007136788
-#
 
-# Running Script
-
-# run this script from bash command line using
+# To run this script from bash command line using
 # R --no-save < model-rf.R | tee data/run-rf.log
 
 require(dplyr, quietly = TRUE)
 require(randomForest, quietly = TRUE)
 require(rfUtilities, quietly = TRUE)
-require(ggplot2, quietly = TRUE)
 
 # load raw data
-raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
+raw <- read.csv("data/pml-training.csv", header = TRUE,
+                na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
 
 # set classe as a factor
 raw$classe <- factor(raw$classe)
@@ -59,8 +56,6 @@ trainNames <-
 trainFormula <- as.formula(paste("classe ~ ", paste(trainNames, collapse = "+")))
 print(trainFormula)
 
-# model
-
 # model using random forest
 if (file.exists("data/model-rf.rds")) {
     print("Restoring model ...")
@@ -75,6 +70,9 @@ if (file.exists("data/model-rf.rds")) {
     # save model
     saveRDS(model, "data/model-rf.rds")
 }
+
+# show model
+model
 
 # check multi-collinearity
 multi.collinear(dplyr::select(training, one_of(trainNames)))

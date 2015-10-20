@@ -18,37 +18,34 @@ Type 'demo()' for some demos, 'help()' for on-line help, or
 Type 'q()' to quit R.
 
 > #!/usr/bin/R --verbose
->
+> 
 > # Method
->
+> 
 > # Random forest is affected by multi-collinearity but not by outlier problem.
 > # See http://www.listendata.com/2014/11/random-forest-with-r.html
->
+> 
 > # A much better way to do this (CPU wise) is directly using the Random Forest package.
 > # See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
-> #
-> # Built a similar model < 10 minutes. :-( I wish I new this earlier!
+> 
+> # Built a similar model ~ 1 minute
 > # Estimated error was also less:
 > # Caret (1+ hours to run): 0.009345794
 > # RandomForest (< 10 minutes): 0.007136788
-> #
->
-> # Running Script
->
-> # run this script from bash command line using
+> 
+> # To run this script from bash command line using
 > # R --no-save < model-rf.R | tee data/run-rf.log
->
+> 
 > require(dplyr, quietly = TRUE)
 > require(randomForest, quietly = TRUE)
 > require(rfUtilities, quietly = TRUE)
-> require(ggplot2, quietly = TRUE)
->
+> 
 > # load raw data
-> raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
->
+> raw <- read.csv("data/pml-training.csv", header = TRUE,
++                 na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
+> 
 > # set classe as a factor
 > raw$classe <- factor(raw$classe)
->
+> 
 > # split into train (70%) and test (30%)
 > set.seed(033)
 > dataSize <- nrow(raw)
@@ -56,50 +53,48 @@ Type 'q()' to quit R.
 > rawindex <- sample(seq_len(dataSize), size = sampleSize)
 > training <- raw[rawindex,]
 > testing <- raw[-rawindex,]
->
+> 
 > # do we have a good classe split?
 > table(training$classe)
 
-   A    B    C    D    E
-3884 2661 2377 2284 2529
+   A    B    C    D    E 
+3884 2661 2377 2284 2529 
 > table(testing$classe)
 
-   A    B    C    D    E
-1696 1136 1045  932 1078
->
+   A    B    C    D    E 
+1696 1136 1045  932 1078 
+> 
 > # ignore columns that are more than 95% empty (i.e. NA):
 > nasPerc <- as.integer(0.95 * nrow(raw))
 > nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 > badNames <- sort(names(nas[nas >= nasPerc]))
 > goodNames <- setdiff(names(training), badNames)
->
+> 
 > # exclude columns that do not aid in prediction (or are an outcome)
 > trainNames <-
 +     grep(
 +         paste("classe", "window", "user_name", "X", "_timestamp", sep = "|"),
 +         goodNames, value = TRUE, invert = TRUE
 +     )
->
+> 
 > # use these column names to generate training formula
 > trainFormula <- as.formula(paste("classe ~ ", paste(trainNames, collapse = "+")))
 > print(trainFormula)
-classe ~ roll_belt + pitch_belt + yaw_belt + total_accel_belt +
-    gyros_belt_x + gyros_belt_y + gyros_belt_z + accel_belt_x +
-    accel_belt_y + accel_belt_z + magnet_belt_x + magnet_belt_y +
-    magnet_belt_z + roll_arm + pitch_arm + yaw_arm + total_accel_arm +
-    gyros_arm_x + gyros_arm_y + gyros_arm_z + accel_arm_x + accel_arm_y +
-    accel_arm_z + magnet_arm_x + magnet_arm_y + magnet_arm_z +
-    roll_dumbbell + pitch_dumbbell + yaw_dumbbell + total_accel_dumbbell +
-    gyros_dumbbell_x + gyros_dumbbell_y + gyros_dumbbell_z +
-    accel_dumbbell_x + accel_dumbbell_y + accel_dumbbell_z +
-    magnet_dumbbell_x + magnet_dumbbell_y + magnet_dumbbell_z +
-    roll_forearm + pitch_forearm + yaw_forearm + total_accel_forearm +
-    gyros_forearm_x + gyros_forearm_y + gyros_forearm_z + accel_forearm_x +
-    accel_forearm_y + accel_forearm_z + magnet_forearm_x + magnet_forearm_y +
+classe ~ roll_belt + pitch_belt + yaw_belt + total_accel_belt + 
+    gyros_belt_x + gyros_belt_y + gyros_belt_z + accel_belt_x + 
+    accel_belt_y + accel_belt_z + magnet_belt_x + magnet_belt_y + 
+    magnet_belt_z + roll_arm + pitch_arm + yaw_arm + total_accel_arm + 
+    gyros_arm_x + gyros_arm_y + gyros_arm_z + accel_arm_x + accel_arm_y + 
+    accel_arm_z + magnet_arm_x + magnet_arm_y + magnet_arm_z + 
+    roll_dumbbell + pitch_dumbbell + yaw_dumbbell + total_accel_dumbbell + 
+    gyros_dumbbell_x + gyros_dumbbell_y + gyros_dumbbell_z + 
+    accel_dumbbell_x + accel_dumbbell_y + accel_dumbbell_z + 
+    magnet_dumbbell_x + magnet_dumbbell_y + magnet_dumbbell_z + 
+    roll_forearm + pitch_forearm + yaw_forearm + total_accel_forearm + 
+    gyros_forearm_x + gyros_forearm_y + gyros_forearm_z + accel_forearm_x + 
+    accel_forearm_y + accel_forearm_z + magnet_forearm_x + magnet_forearm_y + 
     magnet_forearm_z
->
-> # model
->
+> 
 > # model using random forest
 > if (file.exists("data/model-rf.rds")) {
 +     print("Restoring model ...")
@@ -115,12 +110,30 @@ classe ~ roll_belt + pitch_belt + yaw_belt + total_accel_belt +
 +     saveRDS(model, "data/model-rf.rds")
 + }
 [1] "Building model ..."
-[1] "Total elapsed time is: 63.598 secs"
->
+[1] "Total elapsed time is: 63.799 secs"
+> 
+> # show model
+> model
+
+Call:
+ randomForest(formula = trainFormula, data = training) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 7
+
+        OOB estimate of  error rate: 0.56%
+Confusion matrix:
+     A    B    C    D    E class.error
+A 3879    4    0    0    1 0.001287333
+B   14 2639    8    0    0 0.008267569
+C    0    9 2366    2    0 0.004627682
+D    0    0   30 2252    2 0.014010508
+E    0    0    0    7 2522 0.002767892
+> 
 > # check multi-collinearity
 > multi.collinear(dplyr::select(training, one_of(trainNames)))
 [1] " NO MULTICOLINEAR VARIABLES IDENTIFIED"
->
+> 
 > # variable importance
 > importance(model)
                      MeanDecreaseGini
@@ -176,17 +189,17 @@ accel_forearm_z             167.18028
 magnet_forearm_x            157.44969
 magnet_forearm_y            152.16368
 magnet_forearm_z            200.27211
->
+> 
 > # cross-validation
 > testPredict <- predict(model, newdata = testing)
->
+> 
 > # estimate error (since this is categorical data we are estimating accuracy)
 > errorRate <- function(trueValues, predictValues) {
 +     sum(trueValues != predictValues) / length(trueValues)
 + }
 > errorRate(testing$classe, testPredict)
 [1] 0.003737048
->
+> 
 > require(caret, quietly = TRUE)
 > confusionMatrix(data = testPredict, reference = testing$classe)
 Confusion Matrix and Statistics
@@ -200,14 +213,14 @@ Prediction    A    B    C    D    E
          E    0    0    0    3 1078
 
 Overall Statistics
-
-               Accuracy : 0.9963
+                                          
+               Accuracy : 0.9963          
                  95% CI : (0.9943, 0.9977)
-    No Information Rate : 0.2881
-    P-Value [Acc > NIR] : < 2.2e-16
-
-                  Kappa : 0.9953
- Mcnemar's Test P-Value : NA
+    No Information Rate : 0.2881          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9953          
+ Mcnemar's Test P-Value : NA              
 
 Statistics by Class:
 
@@ -220,6 +233,6 @@ Prevalence             0.2881   0.1930   0.1775   0.1583   0.1831
 Detection Rate         0.2881   0.1921   0.1767   0.1563   0.1831
 Detection Prevalence   0.2888   0.1930   0.1784   0.1563   0.1836
 Balanced Accuracy      0.9995   0.9973   0.9966   0.9936   0.9997
->
+> 
 > #EOF
->
+> 

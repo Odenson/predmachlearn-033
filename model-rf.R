@@ -5,6 +5,15 @@
 # Random forest is affected by multi-collinearity but not by outlier problem.
 # See http://www.listendata.com/2014/11/random-forest-with-r.html
 
+# A much better way to do this (CPU wise) is directly using the Random Forest package.
+# See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
+#
+# Built a similar model < 10 minutes. :-( I wish I new this earlier!
+# Estimated error was also less:
+# Caret (1+ hours to run): 0.009345794
+# RandomForest (< 10 minutes): 0.007136788
+#
+
 # Running Script
 
 # run this script from bash command line using
@@ -157,16 +166,4 @@ cm$table
 # statistics by class
 round(cm$byClass, 4)
 
-## Validation
-
-# The final model was run against validation data:
-validation <- read.csv(
-    "data/pml-testing.csv", header = TRUE,
-    na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
-)
-validationPredict <- predict(model, newdata = validation)
-# save answers
-saveRDS(validationPredict, "data/predictions-rf.rds")
-
-# These predictions were then processed using the [script](#scripts) ``pred.R``
-# prior to submission for independent evaluation.
+#EOF

@@ -2,6 +2,8 @@
 
 # run model against "validation" to generate "predictions" for submission
 
+require(randomForest, quietly = TRUE)
+
 # restore random forest model
 restoreModel <- function() {
     if (!exists("model") & file.exists("data/model-rf.rds")) {

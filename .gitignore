@@ -6,3 +6,4 @@ docs/
 data/model-rf-?.rds
 data/predictions*.rds
 data/run-rf-?.log
+data/*.txt

@@ -82,8 +82,8 @@ img {
 <li><a href="#choice-of-prediction-algorithm">Choice of Prediction Algorithm</a></li>
 <li><a href="#data-partitioning">Data Partitioning</a></li>
 <li><a href="#training-formula">Training Formula</a></li>
-<li><a href="#training-model">Training Model</a></li>
 <li><a href="#check-multi-collinearity">Check Multi-Collinearity</a></li>
+<li><a href="#training-model">Training Model</a></li>
 <li><a href="#variable-importance">Variable Importance</a></li>
 </ul></li>
 <li><a href="#testing">Testing</a><ul>
@@ -183,7 +183,6 @@ img {
 <div id="choice-of-prediction-algorithm" class="section level3">
 <h3>Choice of Prediction Algorithm</h3>
 <p>A good performing prediction algorithm for classification problems is <a href="https://en.wikipedia.org/wiki/Random_forest">Random Forest</a>. It is resilient to outliers but is affected by multi-collinearity. This will be tested <a href="#check-multi-collinearity">later</a>.</p>
-<p>The predictors used in the formula, were tested using <a href="http://cran.r-project.org/package=rfUtilities">rfUtilities</a>.</p>
 </div>
 <div id="data-partitioning" class="section level3">
 <h3>Data Partitioning</h3>
@@ -240,16 +239,16 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 ##     magnet_forearm_z</code></pre>
 <p>This will appear below in training as the variable <code>trainFormula</code>.</p>
 </div>
+<div id="check-multi-collinearity" class="section level3">
+<h3>Check Multi-Collinearity</h3>
+<p>No collinear variables were identified. The predictors used in the formula, were tested using <a href="http://cran.r-project.org/package=rfUtilities">rfUtilities</a>:</p>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">multi.collinear</span>(dplyr::<span class="kw">select</span>(training, <span class="kw">one_of</span>(trainNames)))</code></pre>
+<pre><code>## [1] &quot; NO MULTICOLINEAR VARIABLES IDENTIFIED&quot;</code></pre>
+</div>
 <div id="training-model" class="section level3">
 <h3>Training Model</h3>
 <p>The Random Forest was trained using the <a href="https://www.stat.berkeley.edu/~breiman/RandomForests/">randomForest</a> package with the defaults:</p>
 <pre class="sourceCode r"><code class="sourceCode r">model &lt;-<span class="st"> </span><span class="kw">randomForest</span>(trainFormula, <span class="dt">data =</span> training)</code></pre>
-</div>
-<div id="check-multi-collinearity" class="section level3">
-<h3>Check Multi-Collinearity</h3>
-<p>No collinear variables were identified. The model was tested with:</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">multi.collinear</span>(dplyr::<span class="kw">select</span>(training, <span class="kw">one_of</span>(trainNames)))</code></pre>
-<pre><code>## [1] &quot; NO MULTICOLINEAR VARIABLES IDENTIFIED&quot;</code></pre>
 </div>
 <div id="variable-importance" class="section level3">
 <h3>Variable Importance</h3>

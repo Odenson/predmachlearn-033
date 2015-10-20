@@ -102,9 +102,6 @@ Forest](https://en.wikipedia.org/wiki/Random_forest). It is resilient to
 outliers but is affected by multi-collinearity. This will be
 tested [later](#check-multi-collinearity).
 
-The predictors used in the formula, were tested using
-[rfUtilities](http://cran.r-project.org/package=rfUtilities).
-
 ### Data Partitioning
 
 The [training data](#data) was partitioned into two:
@@ -152,6 +149,15 @@ print(trainFormula)
 
 This will appear below in training as the variable ``trainFormula``.
 
+### Check Multi-Collinearity
+
+No collinear variables were identified. The predictors used in the formula, were
+tested using [rfUtilities](http://cran.r-project.org/package=rfUtilities):
+
+```{r collinear, echo = TRUE}
+multi.collinear(dplyr::select(training, one_of(trainNames)))
+```
+
 ### Training Model
 
 The Random Forest was trained using the 
@@ -167,14 +173,6 @@ model <- randomForest(trainFormula, data = training)
 if (file.exists("data/model-rf.rds")) {
     model <- readRDS("data/model-rf.rds")
 }
-```
-
-### Check Multi-Collinearity
-
-No collinear variables were identified. The model was tested with:
-
-```{r collinear, echo = TRUE}
-multi.collinear(dplyr::select(training, one_of(trainNames)))
 ```
 
 ### Variable Importance

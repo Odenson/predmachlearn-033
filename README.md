@@ -14,13 +14,13 @@ https://frankhjung.github.io/predmachlearn-033/project.html
 | Name | Description |
 |------|-------------|
 | project.Rmd | project source |
+| model-rf-cv.R | train random forest cv model |
 | pred-rf-cv.R | prepare predictions for submission |
 | getdata.R | download raw CSV data from remote sources |
-| model-rf-cv.R | train random forest model |
+| data/model-rf-cv.rds | save of random forest cv model |
 | data/pml-testing.csv | validation data |
 | data/pml-training.csv | training data |
-| data/model-rf-cv.rds | save of Random forest model |
-| data/run-rf-cv.log | run log of Random Forest model |
+| data/run-rf-cv.log | run log of random forest cv model |
 
 ## random forest (reference only)
 
@@ -28,9 +28,9 @@ This was a basic RF model used for experiments.
 
 | Name | Description |
 |------|-------------|
-| data/model-rf.rds | save of Random forest model |
+| data/model-rf.rds | save of random forest model |
 | data/model-rf.R | train random forest model |
-| data/run-rf.log | run log of Random Forest model |
+| data/run-rf.log | run log of random forest model |
 | pred-rf.R | prepare predictions for submission |
 
 

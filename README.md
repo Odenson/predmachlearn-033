@@ -9,31 +9,38 @@ Science Specialisation](https://www.coursera.org/specializations/jhudatascience)
 The report as a generated HTML page can be found at
 https://frankhjung.github.io/predmachlearn-033/project.html
 
-## file inventory
+## random forest (k-fold cross-validation
 
 | Name | Description |
 |------|-------------|
-| getdata.R | download raw CSV data from remote sources |
-| model-rf.R | train random forest model |
-| pred.R | prepare predictions for submission |
 | project.Rmd | project source |
+| pred-rf-cv.R | prepare predictions for submission |
+| getdata.R | download raw CSV data from remote sources |
+| model-rf-cv.R | train random forest model |
+| data/pml-testing.csv | validation data |
+| data/pml-training.csv | training data |
+| data/model-rf-cv.rds | save of Random forest model |
+| data/run-rf-cv.log | run log of Random Forest model |
 
-## data inventory
+## random forest (reference only)
 
-In ``data`` directory:
-
-| Name | Description |
-|------|-------------|
-| model-rf.rds | save of Random forest model |
-| pml-testing.csv | validation data |
-| pml-training.csv | training data |
-| run-rf.log | run log of Random Forest model |
-
-
-## other models
+This was a basic RF model used for experiments.
 
 | Name | Description |
 |------|-------------|
+| data/model-rf.rds | save of Random forest model |
+| data/model-rf.R | train random forest model |
+| data/run-rf.log | run log of Random Forest model |
+| pred-rf.R | prepare predictions for submission |
+
+
+## lda model (reference only)
+
+This was a basic LDA model used for experiments.
+
+| Name | Description |
+|------|-------------|
+| data/model-lda.rds | save of LDA model (not used) |
+| data/run-lda.log | run log of LDA model (not used) |
 | model-lda.R | train LDA model (not used) |
-| model-lda.rds | save of LDA model (not used) |
-| run-lda.log | run log of LDA model (not used) |
+

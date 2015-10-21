@@ -5,7 +5,8 @@
 # Random forest is affected by multi-collinearity but not by outlier problem.
 # See http://www.listendata.com/2014/11/random-forest-with-r.html
 
-# A much better way to do this (CPU wise) is directly using the Random Forest package.
+# A much better way to do this (CPU wise) is directly using the Random Forest
+# package.
 # See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
 
 # Built a similar model ~ 1 minute
@@ -36,12 +37,12 @@ training <- raw[rawindex,]
 testing <- raw[-rawindex,]
 
 # do we have a good classe split?
-table(training$classe)
-table(testing$classe)
+# table(training$classe)
+# table(testing$classe)
 
 # ignore columns that are more than 95% empty (i.e. NA):
-nasPerc <- as.integer(0.95 * nrow(raw))
-nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+nasPerc <- as.integer(0.95 * nrow(training))
+nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 badNames <- sort(names(nas[nas >= nasPerc]))
 goodNames <- setdiff(names(training), badNames)
 
@@ -55,6 +56,9 @@ trainNames <-
 # use these column names to generate training formula
 trainFormula <- as.formula(paste("classe ~ ", paste(trainNames, collapse = "+")))
 print(trainFormula)
+
+# check multi-collinearity
+multi.collinear(dplyr::select(training, one_of(trainNames)))
 
 # model using random forest
 if (file.exists("data/model-rf.rds")) {
@@ -74,14 +78,13 @@ if (file.exists("data/model-rf.rds")) {
 # show model
 model
 
-# check multi-collinearity
-multi.collinear(dplyr::select(training, one_of(trainNames)))
-
 # variable importance
 importance(model)
 
 # cross-validation
 testPredict <- predict(model, newdata = testing)
+
+model$confusion
 
 # estimate error (since this is categorical data we are estimating accuracy)
 errorRate <- function(trueValues, predictValues) {

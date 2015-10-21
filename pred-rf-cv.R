@@ -9,7 +9,6 @@ restoreModel <- function() {
         print("Restoring model ...")
         readRDS("data/model-rf-cv.rds")
     }
-
 }
 
 # restore validation data

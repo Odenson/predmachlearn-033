@@ -7,17 +7,11 @@
 
 # A much better way to do this (CPU wise) is directly using the Random Forest package.
 # See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
-#
-# Built a similar model < 10 minutes. :-( I wish I new this earlier!
-# Estimated error was also less:
-# Caret (1+ hours to run): 0.009345794
-# RandomForest (< 10 minutes): 0.007136788
-#
 
 # Running Script
 
 # run this script from bash command line using
-# R --no-save < model-rf.R | tee data/run-rf.log
+# R --no-save < model-rf-cv.R | tee data/run-rf-cv.log
 
 require(dplyr, quietly = TRUE)
 require(caret, quietly = TRUE)
@@ -45,8 +39,8 @@ testing <- raw[-rawindex,]
 # prepare model formula:
 
 # ignore columns that are more than 95% empty (i.e. NA):
-nasPerc <- as.integer(0.95 * nrow(raw))
-nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+nasPerc <- as.integer(0.95 * nrow(training))
+nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 badNames <- names(nas[nas >= nasPerc])
 # print(badNames)
 goodNames <- setdiff(names(training), badNames)
@@ -85,7 +79,7 @@ if (file.exists("data/model-rf-cv.rds")) {
 }
 
 # show model
-print(model$finalModel)
+model
 
 # cross-validate against test
 testPredict <- predict(model, newdata = testing)

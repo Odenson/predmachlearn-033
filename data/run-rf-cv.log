@@ -26,17 +26,11 @@ Type 'q()' to quit R.
 > 
 > # A much better way to do this (CPU wise) is directly using the Random Forest package.
 > # See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
-> #
-> # Built a similar model < 10 minutes. :-( I wish I new this earlier!
-> # Estimated error was also less:
-> # Caret (1+ hours to run): 0.009345794
-> # RandomForest (< 10 minutes): 0.007136788
-> #
 > 
 > # Running Script
 > 
 > # run this script from bash command line using
-> # R --no-save < model-rf.R | tee data/run-rf.log
+> # R --no-save < model-rf-cv.R | tee data/run-rf-cv.log
 > 
 > require(dplyr, quietly = TRUE)
 > require(caret, quietly = TRUE)
@@ -64,8 +58,8 @@ Type 'q()' to quit R.
 > # prepare model formula:
 > 
 > # ignore columns that are more than 95% empty (i.e. NA):
-> nasPerc <- as.integer(0.95 * nrow(raw))
-> nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+> nasPerc <- as.integer(0.95 * nrow(training))
+> nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 > badNames <- names(nas[nas >= nasPerc])
 > # print(badNames)
 > goodNames <- setdiff(names(training), badNames)
@@ -118,25 +112,28 @@ classe ~ accel_arm_x + accel_arm_y + accel_arm_z + accel_belt_x +
 +     saveRDS(model, "data/model-rf-cv.rds")
 + }
 [1] "Building model ..."
-[1] "Total elapsed time is: 622.287 secs"
+[1] "Total elapsed time is: 628.932 secs"
 > 
 > # show model
-> print(model$finalModel)
+> model
+Random Forest 
 
-Call:
- randomForest(x = x, y = y, mtry = param$mtry) 
-               Type of random forest: classification
-                     Number of trees: 500
-No. of variables tried at each split: 2
+13737 samples
+  159 predictors
+    5 classes: 'A', 'B', 'C', 'D', 'E' 
 
-        OOB estimate of  error rate: 0.65%
-Confusion matrix:
-     A    B    C    D    E  class.error
-A 3904    1    1    0    0 0.0005120328
-B   19 2633    6    0    0 0.0094055681
-C    0   15 2379    2    0 0.0070951586
-D    0    0   38 2213    1 0.0173179396
-E    0    0    1    5 2519 0.0023762376
+No pre-processing
+Resampling: Cross-Validated (5 fold) 
+Summary of sample sizes: 10990, 10988, 10990, 10991, 10989 
+Resampling results across tuning parameters:
+
+  mtry  Accuracy   Kappa      Accuracy SD  Kappa SD   
+   2    0.9917008  0.9895006  0.001421576  0.001799429
+  27    0.9903907  0.9878431  0.001112211  0.001407831
+  52    0.9824562  0.9778046  0.002881960  0.003644755
+
+Accuracy was used to select the optimal model using  the largest value.
+The final value used for the model was mtry = 2. 
 > 
 > # cross-validate against test
 > testPredict <- predict(model, newdata = testing)

@@ -130,8 +130,8 @@ Applying these conditions gives the prediction formula:
 
 ```{r formula, echo = TRUE}
 # ignore columns that are more than 95% empty (i.e. NA):
-nasPerc <- as.integer(0.95 * nrow(raw))
-nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+nasPerc <- as.integer(0.95 * nrow(training))
+nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 badNames <- sort(names(nas[nas >= nasPerc]))
 goodNames <- setdiff(names(training), badNames)
 

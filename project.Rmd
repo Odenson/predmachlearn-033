@@ -180,6 +180,13 @@ model
 ```
 Where ``mtry`` is the number of randomly selected predictors.
 
+This final model has an accuracy of
+**`r round(rfStats(model$finalModel)[1], 3)`**
+and an [out-of-bag
+(OOB)](https://www.stat.berkeley.edu/~breiman/RandomForests/cc_home.htm#ooberr)
+estimate of error rate,
+**`r round(100 * (1 - rfStats(model$finalModel)[1]), 3)`%**.
+
 ### Variable Importance
 
 A plot of [variable
@@ -227,13 +234,13 @@ Since this is categorical data, estimate using an accuracy measure:
 
 ```{r estimateErrorRate, echo = TRUE}
 # estimate error (since this is categorical data we are estimating accuracy)
-errorRate <- function(trueValues, predictValues) {
-    sum(trueValues != predictValues) / length(trueValues)
-}
-estimated <- errorRate(testing$classe, testPredict)
+# page 37 (james2013introduction)
+estimated <- sum(testPredict != testing$classe) / length(testing$classe)
 ```
 
-The estimated error rate for this model is **`r round(100 * estimated, 3)`%**.
+So, against the independent testing dataset, the estimated error rate for this
+model is **`r round(100 * estimated, 3)`%**. Note that this is a more
+pessimistic estimate than the [OOB estimated of error rate](#training-model).
 
 ## Predictions
 
@@ -280,7 +287,8 @@ https://github.com/frankhjung/predmachlearn-033.
 
 ### Session Information
 
-This report was produced using the following RStudio environment:
+This report was produced using the following [RStudio](https://www.rstudio.com/)
+environment:
 
 ```{r session}
 sessionInfo()

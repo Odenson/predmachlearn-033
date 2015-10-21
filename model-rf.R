@@ -84,10 +84,8 @@ importance(model)
 testPredict <- predict(model, newdata = testing)
 
 # estimate error (since this is categorical data we are estimating accuracy)
-errorRate <- function(trueValues, predictValues) {
-    sum(trueValues != predictValues) / length(trueValues)
-}
-errorRate(testing$classe, testPredict)
+# see page 37 (james2013introduction)
+sum(testPredict != testing$classe) / length(testing$classe)
 
 require(caret, quietly = TRUE)
 confusionMatrix(data = testPredict, reference = testing$classe)

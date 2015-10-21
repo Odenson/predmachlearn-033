@@ -84,10 +84,8 @@ model
 # cross-validate against test
 testPredict <- predict(model, newdata = testing)
 # estimate error (since this is categorical data we are estimating accuracy)
-errorRate <- function(trueValues, predictValues) {
-    sum(trueValues != predictValues) / length(trueValues)
-}
-errorRate(testing$classe, testPredict)
+# see page 37 (james2013introduction)
+sum(testPredict != testing$classe) / length(testing$classe)
 
 # print Accuracy and Kappa (measure of rating variable(s) agreement)
 postResample(testPredict, testing$classe)

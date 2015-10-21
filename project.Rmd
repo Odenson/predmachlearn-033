@@ -108,7 +108,7 @@ tested [later](#check-multi-collinearity).
 The [training data](#data) was partitioned into two:
 
 * training (70%) - used to train model
-* testing (30%) - used for [cross-validation](#testing), and estimate the [error rate](#estimation-of-error-rate)
+* testing (30%) - used for [cross-validation](#testing), and estimation of the [error rate](#estimation-of-error-rate)
 
 ```{r partition, echo = TRUE}
 # split into train (70%) and test (30%) on outcome (classe)
@@ -129,8 +129,8 @@ Applying these conditions gives the prediction formula:
 
 ```{r formula, echo = TRUE}
 # ignore columns that are more than 95% empty (i.e. NA):
-nasPerc <- as.integer(0.95 * nrow(raw))
-nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+nasPerc <- as.integer(0.95 * nrow(training))
+nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 badNames <- sort(names(nas[nas >= nasPerc]))
 goodNames <- setdiff(names(training), badNames)
 
@@ -178,7 +178,7 @@ if (file.exists("data/model-rf-cv.rds")) {
 # show model
 model
 ```
-Where ``mtry`` is number of randomly selected predictors.
+Where ``mtry`` is the number of randomly selected predictors.
 
 ### Variable Importance
 
@@ -237,7 +237,8 @@ The estimated error rate for this model is **`r round(100 * estimated, 3)`%**.
 
 ## Predictions
 
-The model was then used to predict classe outcomes for an alternate data set:
+The model was then used to predict ``classe`` outcomes for a validation data
+set:
 
 ```{r validation, echo = TRUE}
 validation <- read.csv("data/pml-testing.csv", header = TRUE,
@@ -253,11 +254,11 @@ kable(t(results), align = "c", caption = "Model Predictions for Validation Data"
 
 ### References
 
-Source research paper:
+* Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. ([PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf))
 
-* Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
+* Book (hastie2009elements) Hastie, T.; Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition Springer, 2009
 
-* [A Brief Tour of the Trees and Forests](http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/)
+* Book (james2013introduction) James, G.; Witten, D.; Hastie, T. & Tibshirani, R. An Introduction to Statistical Learning: with Applications in R Springer New York, 2013
 
 ### Data
 

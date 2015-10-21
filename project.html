@@ -190,7 +190,7 @@ img {
 <p>The <a href="#data">training data</a> was partitioned into two:</p>
 <ul>
 <li>training (70%) - used to train model</li>
-<li>testing (30%) - used for <a href="#testing">cross-validation</a>, and estimate the <a href="#estimation-of-error-rate">error rate</a></li>
+<li>testing (30%) - used for <a href="#testing">cross-validation</a>, and estimation of the <a href="#estimation-of-error-rate">error rate</a></li>
 </ul>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># split into train (70%) and test (30%) on outcome (classe)</span>
 <span class="kw">set.seed</span>(<span class="dv">033</span>)
@@ -207,8 +207,8 @@ testing &lt;-<span class="st"> </span>raw[-rawindex,]</code></pre>
 </ul>
 <p>Applying these conditions gives the prediction formula:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="co"># ignore columns that are more than 95% empty (i.e. NA):</span>
-nasPerc &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="fl">0.95</span> *<span class="st"> </span><span class="kw">nrow</span>(raw))
-nas &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">apply</span>(raw, <span class="dv">2</span>, function(x) <span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(x)))), <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
+nasPerc &lt;-<span class="st"> </span><span class="kw">as.integer</span>(<span class="fl">0.95</span> *<span class="st"> </span><span class="kw">nrow</span>(training))
+nas &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">apply</span>(training, <span class="dv">2</span>, function(x) <span class="kw">length</span>(<span class="kw">which</span>(<span class="kw">is.na</span>(x)))), <span class="dt">decreasing =</span> <span class="ot">TRUE</span>)
 badNames &lt;-<span class="st"> </span><span class="kw">sort</span>(<span class="kw">names</span>(nas[nas &gt;=<span class="st"> </span>nasPerc]))
 goodNames &lt;-<span class="st"> </span><span class="kw">setdiff</span>(<span class="kw">names</span>(training), badNames)
 
@@ -267,7 +267,7 @@ trainFormula &lt;-<span class="st"> </span><span class="kw">as.formula</span>(<s
 ## 
 ## Accuracy was used to select the optimal model using  the largest value.
 ## The final value used for the model was mtry = 2.</code></pre>
-<p>Where <code>mtry</code> is number of randomly selected predictors.</p>
+<p>Where <code>mtry</code> is the number of randomly selected predictors.</p>
 </div>
 <div id="variable-importance" class="section level3">
 <h3>Variable Importance</h3>
@@ -568,7 +568,7 @@ estimated &lt;-<span class="st"> </span><span class="kw">errorRate</span>(testin
 </div>
 <div id="predictions" class="section level2">
 <h2>Predictions</h2>
-<p>The model was then used to predict classe outcomes for an alternate data set:</p>
+<p>The model was then used to predict <code>classe</code> outcomes for a validation data set:</p>
 <pre class="sourceCode r"><code class="sourceCode r">validation &lt;-<span class="st"> </span><span class="kw">read.csv</span>(<span class="st">&quot;data/pml-testing.csv&quot;</span>, <span class="dt">header =</span> <span class="ot">TRUE</span>,
                        <span class="dt">na.strings =</span> <span class="kw">c</span>(<span class="st">&quot;NA&quot;</span>, <span class="st">&quot;#DIV/0!&quot;</span>), <span class="dt">stringsAsFactors =</span> <span class="ot">FALSE</span>)
 
@@ -634,10 +634,10 @@ results &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span c
 <h2>Appendices</h2>
 <div id="references" class="section level3">
 <h3>References</h3>
-<p>Source research paper:</p>
 <ul>
-<li><p>Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. <a href="http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201">Qualitative Activity Recognition of Weight Lifting Exercises</a>. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13) . Stuttgart, Germany: ACM SIGCHI, 2013. <a href="http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf">PDF</a></p></li>
-<li><p><a href="http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/">A Brief Tour of the Trees and Forests</a></p></li>
+<li><p>Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. <a href="http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201">Qualitative Activity Recognition of Weight Lifting Exercises</a>. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13) . Stuttgart, Germany: ACM SIGCHI, 2013. (<a href="http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf">PDF</a>)</p></li>
+<li><p>Book (hastie2009elements) Hastie, T.; Tibshirani, R. &amp; Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition Springer, 2009</p></li>
+<li><p>Book (james2013introduction) James, G.; Witten, D.; Hastie, T. &amp; Tibshirani, R. An Introduction to Statistical Learning: with Applications in R Springer New York, 2013</p></li>
 </ul>
 </div>
 <div id="data" class="section level3">

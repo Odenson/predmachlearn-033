@@ -184,7 +184,7 @@ Where ``mtry`` is the number of randomly selected predictors.
 
 A plot of [variable
 importance](https://en.wikipedia.org/wiki/Random_forest#Variable_importance)
-scaled from 0 to 100 :
+scaled from 0 (low importance) to 100 (high importance):
 
 ```{r varImpPlot}
 vi <- varImp(model)
@@ -192,7 +192,7 @@ vi <- varImp(model)
 # put into data frame for use in plot and table
 viDf <- data.frame(Index = 1:nrow(vi$importance),
                    Variable = as.character(rownames(vi$importance)),
-                   Importance = vi$importance$Overall)
+                   Importance = round(vi$importance$Overall, 2))
 
 # plot
 ggplot(data = viDf, aes(x = Index, y = Importance)) +

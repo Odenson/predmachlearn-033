@@ -1,0 +1,218 @@
+
+R version 3.2.2 (2015-08-14) -- "Fire Safety"
+Copyright (C) 2015 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> #!/usr/bin/R --verbose
+> 
+> # Method
+> 
+> # Random forest is affected by multi-collinearity but not by outlier problem.
+> # See http://www.listendata.com/2014/11/random-forest-with-r.html
+> 
+> # A much better way to do this (CPU wise) is directly using the Random Forest package.
+> # See http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/
+> #
+> # Built a similar model < 10 minutes. :-( I wish I new this earlier!
+> # Estimated error was also less:
+> # Caret (1+ hours to run): 0.009345794
+> # RandomForest (< 10 minutes): 0.007136788
+> #
+> 
+> # Running Script
+> 
+> # run this script from bash command line using
+> # R --no-save < model-rf.R | tee data/run-rf.log
+> 
+> require(dplyr, quietly = TRUE)
+> require(caret, quietly = TRUE)
+> require(rfUtilities, quietly = TRUE)
+> 
+> # load raw data
+> raw <- read.csv(
++     "data/pml-training.csv", header = TRUE,
++     na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE
++ )
+> 
+> # set outcome variable, classe as a factor
+> raw$classe <- factor(raw$classe)
+> 
+> # order by window num and raw_timestamp_part_2 to mimic a timeseries
+> raw <- arrange(raw, num_window, raw_timestamp_part_2)
+> 
+> # split into train (70%) and test (30%) on classe
+> set.seed(033)
+> rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE, times = 1)
+> training <- raw[rawindex,]
+> testing <- raw[-rawindex,]
+> 
+> 
+> # prepare model formula:
+> 
+> # ignore columns that are more than 95% empty (i.e. NA):
+> nasPerc <- as.integer(0.95 * nrow(raw))
+> nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+> badNames <- names(nas[nas >= nasPerc])
+> # print(badNames)
+> goodNames <- setdiff(names(training), badNames)
+> # print(goodNames)
+> # exclude columns that do not aid in prediction (or are an outcome)
+> # method: (inner to outer)
+> # - paste together with OR condition all names to exclude
+> # - grep returning inverted matched names (i.e. collect those that don't match)
+> # - sort alphabetically to help us humans
+> trainNames <- sort(grep(
++     paste("classe", "_window", "user_name", "X", "_timestamp", sep = "|"),
++     goodNames, value = TRUE, invert = TRUE)
++ )
+> # print(trainNames)
+> # use these names to generate training formula
+> trainFormula <- as.formula(paste("classe ~ ", paste(trainNames, collapse = "+")))
+> print(trainFormula)
+classe ~ accel_arm_x + accel_arm_y + accel_arm_z + accel_belt_x + 
+    accel_belt_y + accel_belt_z + accel_dumbbell_x + accel_dumbbell_y + 
+    accel_dumbbell_z + accel_forearm_x + accel_forearm_y + accel_forearm_z + 
+    gyros_arm_x + gyros_arm_y + gyros_arm_z + gyros_belt_x + 
+    gyros_belt_y + gyros_belt_z + gyros_dumbbell_x + gyros_dumbbell_y + 
+    gyros_dumbbell_z + gyros_forearm_x + gyros_forearm_y + gyros_forearm_z + 
+    magnet_arm_x + magnet_arm_y + magnet_arm_z + magnet_belt_x + 
+    magnet_belt_y + magnet_belt_z + magnet_dumbbell_x + magnet_dumbbell_y + 
+    magnet_dumbbell_z + magnet_forearm_x + magnet_forearm_y + 
+    magnet_forearm_z + pitch_arm + pitch_belt + pitch_dumbbell + 
+    pitch_forearm + roll_arm + roll_belt + roll_dumbbell + roll_forearm + 
+    total_accel_arm + total_accel_belt + total_accel_dumbbell + 
+    total_accel_forearm + yaw_arm + yaw_belt + yaw_dumbbell + 
+    yaw_forearm
+> 
+> # check if any of these columns have problems with multi-collinearity
+> multi.collinear(dplyr::select(training, one_of(trainNames)))
+[1] " NO MULTICOLINEAR VARIABLES IDENTIFIED"
+> 
+> # model using random forest
+> if (file.exists("data/model-rf-cv.rds")) {
++     print("Restoring model ...")
++     model <- readRDS("data/model-rf-cv.rds")
++ } else {
++     print("Building model ...")
++     # record start time of model build
++     starttime <- proc.time()
++     model <- train(trainFormula, data = training, method = "rf",
++                    trControl = trainControl(method = "cv", number = 5))
++     # how long did this model take to build?
++     print(paste("Total elapsed time is:", (proc.time() - starttime)[["elapsed"]], "secs"))
++     # save model
++     saveRDS(model, "data/model-rf-cv.rds")
++ }
+[1] "Building model ..."
+[1] "Total elapsed time is: 622.287 secs"
+> 
+> # show model
+> print(model$finalModel)
+
+Call:
+ randomForest(x = x, y = y, mtry = param$mtry) 
+               Type of random forest: classification
+                     Number of trees: 500
+No. of variables tried at each split: 2
+
+        OOB estimate of  error rate: 0.65%
+Confusion matrix:
+     A    B    C    D    E  class.error
+A 3904    1    1    0    0 0.0005120328
+B   19 2633    6    0    0 0.0094055681
+C    0   15 2379    2    0 0.0070951586
+D    0    0   38 2213    1 0.0173179396
+E    0    0    1    5 2519 0.0023762376
+> 
+> # cross-validate against test
+> testPredict <- predict(model, newdata = testing)
+> # estimate error (since this is categorical data we are estimating accuracy)
+> errorRate <- function(trueValues, predictValues) {
++     sum(trueValues != predictValues) / length(trueValues)
++ }
+> errorRate(testing$classe, testPredict)
+[1] 0.009685641
+> 
+> # print Accuracy and Kappa (measure of rating variable(s) agreement)
+> postResample(testPredict, testing$classe)
+ Accuracy     Kappa 
+0.9903144 0.9877473 
+> 
+> # show confusion matrix
+> confusionMatrix(data = testPredict, reference = testing$classe)
+Confusion Matrix and Statistics
+
+          Reference
+Prediction    A    B    C    D    E
+         A 1669    7    0    0    0
+         B    4 1127   11    0    0
+         C    0    5 1015   25    0
+         D    0    0    0  935    0
+         E    1    0    0    4 1082
+
+Overall Statistics
+                                          
+               Accuracy : 0.9903          
+                 95% CI : (0.9875, 0.9927)
+    No Information Rate : 0.2845          
+    P-Value [Acc > NIR] : < 2.2e-16       
+                                          
+                  Kappa : 0.9877          
+ Mcnemar's Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: A Class: B Class: C Class: D Class: E
+Sensitivity            0.9970   0.9895   0.9893   0.9699   1.0000
+Specificity            0.9983   0.9968   0.9938   1.0000   0.9990
+Pos Pred Value         0.9958   0.9869   0.9713   1.0000   0.9954
+Neg Pred Value         0.9988   0.9975   0.9977   0.9941   1.0000
+Prevalence             0.2845   0.1935   0.1743   0.1638   0.1839
+Detection Rate         0.2836   0.1915   0.1725   0.1589   0.1839
+Detection Prevalence   0.2848   0.1941   0.1776   0.1589   0.1847
+Balanced Accuracy      0.9977   0.9932   0.9916   0.9850   0.9995
+> 
+> # Variable Importance
+> varImp(model)
+rf variable importance
+
+  only 20 most important variables shown (out of 52)
+
+                  Overall
+roll_belt          100.00
+yaw_belt            83.68
+magnet_dumbbell_z   72.88
+magnet_dumbbell_y   67.51
+pitch_belt          63.73
+pitch_forearm       59.54
+roll_forearm        54.46
+magnet_dumbbell_x   52.94
+accel_belt_z        47.95
+accel_dumbbell_y    46.29
+magnet_belt_z       44.38
+roll_dumbbell       43.75
+magnet_belt_y       43.52
+accel_dumbbell_z    39.64
+roll_arm            35.45
+accel_forearm_x     34.44
+accel_dumbbell_x    32.04
+gyros_belt_z        30.52
+yaw_dumbbell        29.70
+magnet_belt_x       27.74
+> 
+> #EOF
+> 

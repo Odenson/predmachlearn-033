@@ -1,7 +1,7 @@
 ---
 title: "Predict Correct Use of Dumbbells"
 author: "Frank Jung"
-date: "20 October 2015"
+date: "21 October 2015"
 output:
   html_document:
     fig_caption: yes
@@ -11,7 +11,7 @@ output:
 
 ```{r initialisation, echo=FALSE, message=FALSE, warning=FALSE}
 require(knitr, quietly = TRUE)
-require(randomForest, quietly = TRUE)
+require(caret, quietly = TRUE)
 require(dplyr, quietly = TRUE)
 require(ggplot2, quietly = TRUE)
 require(rfUtilities, quietly = TRUE)
@@ -20,7 +20,8 @@ knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
 
 ```{r load, echo=FALSE}
 # load raw data
-raw <- read.csv("data/pml-training.csv", header = TRUE, na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
+raw <- read.csv("data/pml-training.csv", header = TRUE,
+                na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
 
 # set classe as a factor
 raw$classe <- factor(raw$classe)
@@ -107,14 +108,12 @@ tested [later](#check-multi-collinearity).
 The [training data](#data) was partitioned into two:
 
 * training (70%) - used to train model
-* testing (30%) - used for [cross-validation](#testing), and estimate the [error rate](#estimation-of-error-rate)
+* testing (30%) - used for [cross-validation](#testing), and estimation of the [error rate](#estimation-of-error-rate)
 
 ```{r partition, echo = TRUE}
-# split into train (70%) and test (30%)
+# split into train (70%) and test (30%) on outcome (classe)
 set.seed(033)
-dataSize <- nrow(raw)
-sampleSize <- floor(0.70 * dataSize)
-rawindex <- sample(seq_len(dataSize), size = sampleSize)
+rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
 training <- raw[rawindex,]
 testing <- raw[-rawindex,]
 ```
@@ -130,8 +129,8 @@ Applying these conditions gives the prediction formula:
 
 ```{r formula, echo = TRUE}
 # ignore columns that are more than 95% empty (i.e. NA):
-nasPerc <- as.integer(0.95 * nrow(raw))
-nas <- sort(apply(raw, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+nasPerc <- as.integer(0.95 * nrow(training))
+nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
 badNames <- sort(names(nas[nas >= nasPerc]))
 goodNames <- setdiff(names(training), badNames)
 
@@ -160,50 +159,57 @@ multi.collinear(dplyr::select(training, one_of(trainNames)))
 
 ### Training Model
 
-The Random Forest was trained using the 
-[randomForest](https://www.stat.berkeley.edu/~breiman/RandomForests/) package
-with the defaults:
+For training we will use a cross-validated Random Forest using the
+[caret](http://topepo.github.io/caret/index.html) package. The cross-validation
+used here is a simple
+[k-fold](https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation).
+Where k is set to 5.
 
 ```r
-model <- randomForest(trainFormula, data = training)
+model <- train(trainFormula, data = training, method = "rf",
+               trControl = trainControl(method = "cv", number = 5))
 ```
 
 ```{r train}
-# model using random forest
-if (file.exists("data/model-rf.rds")) {
-    model <- readRDS("data/model-rf.rds")
+# restore saved cross-validated random forest model
+if (file.exists("data/model-rf-cv.rds")) {
+    model <- readRDS("data/model-rf-cv.rds")
 }
+# show model
+model
 ```
+Where ``mtry`` is the number of randomly selected predictors.
 
 ### Variable Importance
 
 A plot of [variable
 importance](https://en.wikipedia.org/wiki/Random_forest#Variable_importance)
-using Mean Decrease
-[Gini](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity):
+scaled from 0 to 100 :
 
-```{r importancePlot}
-imp <- importance(model)
+```{r varImpPlot}
+vi <- varImp(model)
 
 # put into data frame for use in plot and table
-impVar <- data.frame(Index = 1:nrow(imp), Variable = rownames(imp), Importance = imp[, 1])
+viDf <- data.frame(Index = 1:nrow(vi$importance),
+                   Variable = as.character(rownames(vi$importance)),
+                   Importance = vi$importance$Overall)
 
 # plot
-ggplot(data = impVar, aes(x = Index, y = Importance)) +
+ggplot(data = viDf, aes(x = Index, y = Importance)) +
     geom_point(shape = 1) +
     geom_line(colour = "purple") +
     theme_light(base_family = "sans", base_size = 11) +
     scale_y_continuous(breaks = seq(0, 900, by = 50)) +
     scale_x_discrete(breaks = seq(0, 52, by = 2)) +
-    labs(y = "Importance (Mean Decrease Gini)") +
+    labs(y = "Importance (Scaled from 0 to 100)") +
     ggtitle("Variable Importance")
 ```
 
-The full list by variable importance:
+The full list by scaled variable importance:
 
 ```{r importanceTable}
 # full table in decreasing order of importance
-kable(arrange(impVar, desc(Importance)), caption = "Variable Importance")
+kable(arrange(viDf, desc(Importance)), caption = "Variable Importance")
 ```
 
 ## Testing
@@ -229,15 +235,30 @@ estimated <- errorRate(testing$classe, testPredict)
 
 The estimated error rate for this model is **`r round(100 * estimated, 3)`%**.
 
+## Predictions
+
+The model was then used to predict ``classe`` outcomes for a validation data
+set:
+
+```{r validation, echo = TRUE}
+validation <- read.csv("data/pml-testing.csv", header = TRUE,
+                       na.strings = c("NA", "#DIV/0!"), stringsAsFactors = FALSE)
+
+predictions <- predict(model, newdata = validation)
+results <- data.frame(Classe = as.character(predictions))
+rownames(results) <- 1:length(predictions)
+kable(t(results), align = "c", caption = "Model Predictions for Validation Data")
+```
+
 ## Appendices
 
 ### References
 
-Source research paper:
+* Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. ([PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf))
 
-* Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. [Qualitative Activity Recognition of Weight Lifting Exercises](http://groupware.les.inf.puc-rio.br/work.jsf?p1=11201). Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human '13) . Stuttgart, Germany: ACM SIGCHI, 2013. [PDF](http://groupware.les.inf.puc-rio.br/public/papers/2013.Velloso.QAR-WLE.pdf)
+* Book (hastie2009elements) Hastie, T.; Tibshirani, R. & Friedman, J. The Elements of Statistical Learning: Data Mining, Inference, and Prediction, Second Edition Springer, 2009
 
-* [A Brief Tour of the Trees and Forests](http://www.r-bloggers.com/a-brief-tour-of-the-trees-and-forests/)
+* Book (james2013introduction) James, G.; Witten, D.; Hastie, T. & Tibshirani, R. An Introduction to Statistical Learning: with Applications in R Springer New York, 2013
 
 ### Data
 
@@ -254,8 +275,8 @@ https://github.com/frankhjung/predmachlearn-033.
 | Name | Description |
 |------|-------------|
 | getdata.R | download raw CSV data from remote sources |
-| model-rf.R | full script to train and test random forest model |
-| pred.R | prepare predictions for submission |
+| model-rf-cv.R | full script to train and test cross-validate random forest model |
+| pred-rf-cv.R | prepare predictions for submission |
 
 ### Session Information
 

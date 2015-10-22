@@ -1,4 +1,4 @@
-# predmachlearn-033 Project
+# predmachlearn-033 project
 
 This is the project source code for [Coursera](https://www.coursera.org/) [Data
 Science Specialisation](https://www.coursera.org/specializations/jhudatascience)

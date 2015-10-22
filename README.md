@@ -9,7 +9,7 @@ Science Specialisation](https://www.coursera.org/specializations/jhudatascience)
 The report as a generated HTML page can be found at
 https://frankhjung.github.io/predmachlearn-033/project.html
 
-## random forest (k-fold cross-validation
+## random forest using k-fold cross-validation
 
 | Name | Description |
 |------|-------------|
@@ -22,7 +22,11 @@ https://frankhjung.github.io/predmachlearn-033/project.html
 | data/pml-training.csv | training data |
 | data/run-rf-cv.log | run log of random forest cv model |
 
-## random forest (reference only)
+## models used for testing and teaching
+
+I used these models and scripts to get a handle on what to do in this project.
+
+### random forest (reference only)
 
 This was a basic RF model used for experiments.
 
@@ -34,7 +38,7 @@ This was a basic RF model used for experiments.
 | pred-rf.R | prepare predictions for submission |
 
 
-## lda model (reference only)
+### lda model (reference only)
 
 This was a basic LDA model used for experiments.
 

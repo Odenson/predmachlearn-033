@@ -7,7 +7,8 @@ Science Specialisation](https://www.coursera.org/specializations/jhudatascience)
 ## report
 
 The report as a generated HTML page can be found at
-https://frankhjung.github.io/predmachlearn-033/project.html
+
+* https://frankhjung.github.io/predmachlearn-033/project.html
 
 ## random forest using k-fold cross-validation
 

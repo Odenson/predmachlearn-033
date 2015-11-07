@@ -31,7 +31,7 @@ raw <- arrange(raw, num_window, raw_timestamp_part_2)
 
 # split into train (70%) and test (30%) on classe
 set.seed(033)
-rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE, times = 1)
+rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
 training <- raw[rawindex,]
 testing <- raw[-rawindex,]
 
@@ -40,7 +40,7 @@ testing <- raw[-rawindex,]
 
 # ignore columns that are more than 95% empty (i.e. NA):
 nasPerc <- as.integer(0.95 * nrow(training))
-nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+nas <- apply(training, 2, function(x) length(which(is.na(x))))
 badNames <- names(nas[nas >= nasPerc])
 # print(badNames)
 goodNames <- setdiff(names(training), badNames)

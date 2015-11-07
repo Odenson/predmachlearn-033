@@ -50,7 +50,7 @@ Type 'q()' to quit R.
 > 
 > # split into train (70%) and test (30%) on classe
 > set.seed(033)
-> rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE, times = 1)
+> rawindex <- createDataPartition(raw$classe, p = 0.7, list = FALSE)
 > training <- raw[rawindex,]
 > testing <- raw[-rawindex,]
 > 
@@ -59,7 +59,7 @@ Type 'q()' to quit R.
 > 
 > # ignore columns that are more than 95% empty (i.e. NA):
 > nasPerc <- as.integer(0.95 * nrow(training))
-> nas <- sort(apply(training, 2, function(x) length(which(is.na(x)))), decreasing = TRUE)
+> nas <- apply(training, 2, function(x) length(which(is.na(x))))
 > badNames <- names(nas[nas >= nasPerc])
 > # print(badNames)
 > goodNames <- setdiff(names(training), badNames)
@@ -112,7 +112,7 @@ classe ~ accel_arm_x + accel_arm_y + accel_arm_z + accel_belt_x +
 +     saveRDS(model, "data/model-rf-cv.rds")
 + }
 [1] "Building model ..."
-[1] "Total elapsed time is: 628.932 secs"
+[1] "Total elapsed time is: 656.687 secs"
 > 
 > # show model
 > model
@@ -138,10 +138,8 @@ The final value used for the model was mtry = 2.
 > # cross-validate against test
 > testPredict <- predict(model, newdata = testing)
 > # estimate error (since this is categorical data we are estimating accuracy)
-> errorRate <- function(trueValues, predictValues) {
-+     sum(trueValues != predictValues) / length(trueValues)
-+ }
-> errorRate(testing$classe, testPredict)
+> # see page 37 (james2013introduction)
+> sum(testPredict != testing$classe) / length(testing$classe)
 [1] 0.009685641
 > 
 > # print Accuracy and Kappa (measure of rating variable(s) agreement)

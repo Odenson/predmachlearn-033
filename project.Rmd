@@ -277,7 +277,7 @@ Data for this project was sourced from:
 ### Source
 
 The source code and model data for this report are available from GitHub,
-https://github.com/frankhjungdss/predmachlearn-033.
+https://github.com/frankjungdss/predmachlearn-033.
 
 | Name | Description |
 |------|-------------|
